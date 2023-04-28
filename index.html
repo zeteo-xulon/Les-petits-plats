@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./node_modules/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="./index.css">
+    <title>Les petits plats</title>
+</head>
+    <body>
+
+        <header class="header">
+            <img src="./assets/Logo.png" alt="logo" class="logo">
+        </header>
+
+        <main class="main">
+            <section class="search">
+                 <div class="search__container">
+                    <input type="search" name="search" class="form-control bg-light" id="search-bar" placeholder="Rechercher une recette">
+                    <button class="magnifier">
+                        <img src="./assets/search-icon.webp" class="search-icon" id="searchIcon" alt="search">
+                    </button>
+                </div>
+                <div class="argument__container" id="argumentContainer">
+                    <p class="btn argument bg-blue txt-white" id="argument1">
+                        <span id="argument1Text">Coco</span>
+                        <span class="argument__close" id="argument1Close">X</span>
+                    </p>
+                    <p class="btn argument bg-blue txt-white" id="argument1">
+                        <span id="argument1Text">Milk</span>
+                        <span class="argument__close" id="argument1Close">X</span>
+                    </p>
+                </div>
+                <ul class="search__advanced">
+
+                    <li class="search__advanced__list bg-blue txt-white" ">
+                        <div class="advanced__search__button" id="searchIngredients">
+                            <button class="btn-transparent">
+                                <img 
+                                src="./assets/chevron_white.png" 
+                                alt="flèche vers le bas, ouvrir la recherche" 
+                                class="arrow arrow-down" 
+                                id="searchIngredientsArrow">
+                           </button>
+                            <p class="search__advanced__text txt-white">Ingrédients</p>
+                        </div>
+                        <aside class="search__advanced__arguments"></aside>
+                    </li>
+
+                    <li class="search__advanced__list bg-green txt-white" >
+                        <div class="advanced__search__button" id="searchDevices">
+                            <button class="btn-transparent">
+                                <img 
+                                src="./assets/chevron_white.png" 
+                                alt="flèche vers le bas, ouvrir la recherche" 
+                                class="arrow arrow-down" 
+                                id="searchDevicesArrow">
+                           </button>
+                            <p class="search__advanced__text txt-white">Appareils</p>
+                        </div>
+                        <aside class="search__advanced__arguments"></aside>
+                    </li>
+
+                    <li class="search__advanced__list bg-red txt-white" >
+                        <div class="advanced__search__button" id="searchTools">
+                            <button class="btn-transparent">
+                                <img 
+                                src="./assets/chevron_white.png" 
+                                alt="flèche vers le bas, ouvrir la recherche" 
+                                class="arrow arrow-down" 
+                                id="searchToolsArrow">
+                           </button>
+                            <p class="search__advanced__text txt-white">Ustensiles</p>
+                        </div>
+                        <aside class="search__advanced__arguments"></aside>
+                    </li>
+
+                </ul>
+            </section>
+           <section class="recipes">
+            <article class="recipes-card card">
+                <img src="#" class="bd-placeholder-img card-img-top" alt="gray bg waiting for real pic">
+                <div class="recipes__top-text">
+                    <h2 class="card-title">Card title</h2>
+                    <p class="card-subtitle">Subtitle text here to complete the title</p>
+                </div>
+                <div class="recipes__down-text">
+                    <p>recipes list ?</p>
+                    <p> devices list ?</p>
+                </div>
+            </article>
+           </section>
+            
+
+        </main>
+    <script src="./node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="module" src="./index.js"></script>
+    </body>
+</html>
