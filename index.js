@@ -1,8 +1,9 @@
-import { createImage, createThis, createThisInput } from "./common.js";
+import { createImage, createThis, createThisInput, CreateRecipeCard } from "./common.js";
 
 const searchIngredients = document.getElementById('searchIngredients');
 const searchDevices = document.getElementById('searchDevices');
 const searchTools = document.getElementById('searchTools');
+// const server = "./data/recipes.js"; == in case of backend server
 
 window.addEventListener('click', (e) => {
     e.preventDefault();
@@ -17,6 +18,29 @@ window.addEventListener('click', (e) => {
     }
 })
 
+
+const displayRecipesCards = () => {
+    // const recipes = await fetchServerData(server);  == in case of backend server
+    const recipesCards = document.getElementById('recipes');
+    recipesCards.innerHTML = "";
+    recipes.forEach(recipe => {
+        const cardModel = new CreateRecipeCard(recipe);
+        const card = cardModel.render();
+        recipesCards.appendChild(card);
+    });
+}
+
+// in case of backend server
+// ==========================
+// async function fetchServerData(server){
+//     const response = await fetch(server);
+//     console.log(response);
+//     const data = await response;
+//     console.log(data);
+//     return data;
+// }
+
+displayRecipesCards();
 
 function createAdvancedSearchButton(specificId, sens){
     const button = createThis('button', 'btn-transparent');

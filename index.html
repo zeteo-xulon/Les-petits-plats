@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="./index.css">
     <title>Les petits plats</title>
 </head>
-    <body>
+    <body class="body">
 
         <header class="header">
             <img src="./assets/Logo.png" alt="logo" class="logo">
@@ -78,23 +78,97 @@
 
                 </ul>
             </section>
-           <section class="recipes">
-            <article class="recipes-card card">
-                <img src="#" class="bd-placeholder-img card-img-top" alt="gray bg waiting for real pic">
-                <div class="recipes__top-text">
-                    <h2 class="card-title">Card title</h2>
-                    <p class="card-subtitle">Subtitle text here to complete the title</p>
-                </div>
-                <div class="recipes__down-text">
-                    <p>recipes list ?</p>
-                    <p> devices list ?</p>
-                </div>
-            </article>
-           </section>
+            <section class="recipes" id="recipes">
+
+                <!-- exemple of card -->
+                <article class="recipe__card card">
+                    <div class="bd-placeholder-img card-img-top"></div>
+                    <aside class="recipe__text">
+                        <div class="recipe__top-text">
+                            <h2 class="card-title">Card title</h2>
+                            <p class="card__cooking-time">
+                                <span class="clock-icon__container">
+                                    <img src="./assets/clock_icon.png" class="clock-icon" alt="clock icon">
+                                </span>
+                                     
+                                <span class="cooking-time" id="cookingTime">99</span>min
+                            </p>
+                        </div>
+                        <div class="recipe__down-text">
+                            <ul class="recipe__ingredient">
+                                <li class="recipe__ingredient__item">
+                                    <span class="recipe__ingredient__name">nom de l'ingrédient</span>
+                                     : 
+                                    <span class="recipe__quantity">quantité</span>
+                                    <span class="recipe__unit">unité</span>
+                                </li>
+                            </ul>
+                            <p class="recipe__description">Here come the descritpion text about the recipe, and what we can find inside this recipe.</p>
+                        </div> 
+                    </aside>
+                </article>
+
+                <article class="recipe__card card">
+                    <div class="bd-placeholder-img card-img-top"></div>
+                    <aside class="recipe__text">
+                        <div class="recipe__top-text">
+                            <h2 class="card-title">Card title</h2>
+                            <p class="card__cooking-time">
+                                <span class="clock-icon__container">
+                                    <img src="./assets/clock_icon.png" class="clock-icon" alt="clock icon">
+                                </span>
+                                     
+                                <span class="cooking-time" id="cookingTime">99</span>min
+                            </p>
+                        </div>
+                        <div class="recipe__down-text">
+                            <ul class="recipe__ingredient">
+                                <li class="recipe__ingredient__item">
+                                    <span class="recipe__ingredient__name">nom de l'ingrédient</span>
+                                     : 
+                                    <span class="recipe__quantity">quantité</span>
+                                    <span class="recipe__unit">unité</span>
+                                </li>
+                            </ul>
+                            <p class="recipe__description">Here come the descritpion text about the recipe, and what we can find inside this recipe.</p>
+                        </div> 
+                    </aside>
+                </article>
+
+                <article class="recipe__card card">
+                    <div class="bd-placeholder-img card-img-top"></div>
+                    <aside class="recipe__text">
+                        <div class="recipe__top-text">
+                            <h2 class="card-title">Card title</h2>
+                            <p class="card__cooking-time">
+                                <span class="clock-icon__container">
+                                    <img src="./assets/clock_icon.png" class="clock-icon" alt="clock icon">
+                                </span>
+                                     
+                                <span class="cooking-time" id="cookingTime">99</span>min
+                            </p>
+                        </div>
+                        <div class="recipe__down-text">
+                            <ul class="recipe__ingredient">
+                                <li class="recipe__ingredient__item">
+                                    <span class="recipe__ingredient__name">nom de l'ingrédient</span>
+                                     : 
+                                    <span class="recipe__quantity">quantité</span>
+                                    <span class="recipe__unit">unité</span>
+                                </li>
+                            </ul>
+                            <p class="recipe__description">Here come the descritpion text about the recipe, and what we can find inside this recipe.</p>
+                        </div> 
+                    </aside>
+                </article>
+                
+
+            </section>
             
 
         </main>
     <script src="./node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="./data/recipes.js"></script>
     <script type="module" src="./index.js"></script>
     </body>
 </html>
