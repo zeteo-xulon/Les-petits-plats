@@ -3,15 +3,17 @@
  * @param {string} elementType - type of element to create
  * @param {string} className - string of class to add to the element
  * @param {string} id - id to add to the element
+ * @param {string} text - text to add to the element
  * @returns {object} element - DOM element created
  * example :
  * <div class="search__advanced__input" id="searchIngredientsInput"></div>
  */
-export function createThis(elementType, className, id){
+export function createThis(elementType, className, id, text){
     const listOfClass = createClassArray(className)
     const element = document.createElement(elementType);
     className ? element.classList.add(...listOfClass) : null;
     id ? element.id = id : null;
+    text ? element.innerText = text : null;
     return element;
 }
 
