@@ -30,11 +30,11 @@
     height: 100%;
     border-radius: 0.375rem;
     border: 1px solid #ced4da;
-    background-color: #F8F9FA;
+    background-color: #E7E7E7;
     margin-bottom: 1rem;
 }
 .magnifier{
-    background: none;
+    background-color: #E7E7E7;
     border: none;
     transition: all 0.25s ease-in-out;
 }
@@ -42,8 +42,12 @@
     cursor: pointer;
     height: 90%;
 }
-#search-bar{
+#searchBar{
     border: none;
+    background-color: #E7E7E7;
+}
+#searchBar::placeholder{
+    color: rgba(0, 0, 0, 0.4);
 }
 .search-icon{ 
     height: 100%; 

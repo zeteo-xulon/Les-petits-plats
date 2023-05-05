@@ -3,9 +3,12 @@ import { createImage, createThis, createThisInput, CreateRecipeCard } from "./co
 const searchIngredients = document.getElementById('searchIngredients');
 const searchDevices = document.getElementById('searchDevices');
 const searchTools = document.getElementById('searchTools');
+const searchBar = document.getElementById('searchBar');
 // const server = "./data/recipes.js"; == in case of backend server
 
 let argumentsSelected = [];
+let foundRecipes = [];
+console.log(recipes);
 
 window.addEventListener('click', (e) => {
     e.preventDefault();
@@ -23,12 +26,67 @@ window.addEventListener('click', (e) => {
     }
 })
 
+searchBar.addEventListener('keyup', (e) => {
+    e.preventDefault();
 
-const displayRecipesCards = () => {
+    if(e.target.value.length > 2){
+        let search = e.target.value.toLowerCase();
+        let filtredRecipes = [];
+
+        /** en plusieur temps :
+        * 1. on filtre les recettes par nom de recette
+        * 2. on filtre les recettes par description de recette
+        * 3. on filtre les recettes par ingredients de recette
+        * 4. on affiche les recettes filtrées
+        * La méthode indexOf est utilisé car plus bas niveau et un peu plus rapide que includes 
+        */
+        for(let i = 0; i < recipes.length; i++){
+            const recipeName = recipes[i].name.toLowerCase();
+            const recipeIngredients = recipes[i].ingredients;
+            const recipeDescription = recipes[i].description.toLowerCase();
+
+            if(recipeName.indexOf(search) !== -1){ filtredRecipes.push(recipes[i]) }
+            else if(recipeDescription.indexOf(search) !== -1){ filtredRecipes.push(recipes[i]) }
+            else{
+                for(let j=0; j < recipeIngredients.length; j++){
+                const ingredientName = recipeIngredients[j].ingredient.toLowerCase();
+                if(ingredientName.indexOf(search) !== -1){ filtredRecipes.push(recipes[i]) }
+                } 
+            }
+        }
+        console.log(filtredRecipes)
+        foundRecipes = filtredRecipes;
+        return displayRecipesCards(filtredRecipes);
+    } else { 
+        return displayRecipesCards(recipes) 
+    }
+})
+searchIngredients.addEventListener('keyup', (e) => {
+    e.preventDefault();
+    if(e.target.value.length > 2){
+        let search = e.target.value.toLowerCase();
+        let filtredRecipes = [];
+        for(let i = 0; i < recipes.length; i++){
+            const recipeIngredients = recipes[i].ingredients;
+            for(let j=0; j < recipeIngredients.length; j++){
+                const ingredientName = recipeIngredients[j].ingredient.toLowerCase();
+                if(ingredientName.indexOf(search) !== -1){ filtredRecipes.push(recipes[i]) }
+            }
+        }
+        console.log(filtredRecipes)
+        return displayRecipesCards(filtredRecipes);
+    } else {
+        return displayRecipesCards(recipes)
+    }
+})
+
+
+
+const displayRecipesCards = (givenRecipes) => {
     // const recipes = await fetchServerData(server);  == in case of backend server
     const recipesCards = document.getElementById('recipes');
     recipesCards.innerHTML = "";
-    recipes.forEach(recipe => {
+    givenRecipes.forEach(recipe => {
         const cardModel = new CreateRecipeCard(recipe);
         const card = cardModel.render();
         recipesCards.appendChild(card);
@@ -45,7 +103,7 @@ const displayRecipesCards = () => {
 //     return data;
 // }
 
-displayRecipesCards();
+displayRecipesCards(recipes);
 
 /**
  * create a button with a specified argument received
