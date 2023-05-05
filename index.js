@@ -138,6 +138,8 @@ function createArgument(bgColor, text){
     const button = createThis('button', 'btn argument txt-white ' + bgColor);
     const span = createThis('span', 'argument__text', null, text);
     const img = createImage('./assets/white_circle_delete_icon.png', 'delete cross', 'argument__close');
+    img.height = 20;
+    img.width = 20;
     button.appendChild(span);
     button.appendChild(img);
     return button;
