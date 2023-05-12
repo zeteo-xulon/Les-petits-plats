@@ -39,8 +39,10 @@ searchBar.addEventListener('keyup', (e) => {
     e.preventDefault();
     const value = e.target.value;
     const recipesFromMainSearchInput = searchFromMainSearchInput(value);
+    console.log(recipesFromMainSearchInput)
     //verifier si il y a des arguments dans le conteneur d'arguments
     const allArguments = getAllArguments();
+    console.log(allArguments)
     if(allArguments.length > 0){
         const recipesFromArguments = searchFromArgumentsAndFoundRecipes(allArguments, recipesFromMainSearchInput);
         return displayRecipesCards(recipesFromArguments);
@@ -313,16 +315,44 @@ function findAllOptions(type){
 function getAllArguments(){
     let allArguments = [];
     const argumentsSelected = document.querySelectorAll('.argument');
+    console.log(argumentsSelected)
     if(argumentsSelected.length > 0){
         for(let i = 0; i < argumentsSelected.length; i++){
             const argument = argumentsSelected[i];
-            const type = argument.parentElement.classList[1];
+            const type = argument.parentElement.classList[2];
             const translatedType = translatedArgument(type);
             allArguments.push({translatedType, argument});
         }
     return allArguments;
+    }
 }
 
-function searchFromArgumentsAndFoundRecipes(arguments, recipes){
+function searchFromArgumentsAndFoundRecipes(argumentsList, recipes){
+    const finalRecipes = [];
+    // pour chaque recette on va vérifier si le premier argument est présent dans la recette
+    // puis cela nous donnera un tableau de recettes qui contiennent le premier argument
+    // puis on va vérifier si le deuxième argument est présent dans le tableau de recettes
+    // et ainsi de suite
+    for(let i = 0; i < recipes.length; i++){
+        let stock = [];
+        for(let j = 0; j < argumentsList.length; j++){
+            const argumentType = argumentsList[j].translatedType;
+            const argument = argumentsList[j].argument.innerText.toLowerCase();
+            
+            if(argumentType === "ingredients"){
+                const recipeArgument = recipes[i].ingredients[j].ingredient.toLowerCase()
+                if(argument === recipeArgument){ stock.push(recipes[i]) }
+            }
 
+            if(argumentType === "appliance"){
+                const recipeArgument = recipes[i].appliance.toLowerCase()
+                if(argument === recipeArgument){ stock.push(recipes[i]) }
+            }
+
+            if(argumentType === "ustensils"){
+                const recipeArgument = recipes[i].ustensils[j].toLowerCase()
+                if(argument === recipeArgument){ stock.push(recipes[i]) }
+            }
+        }
+    }
 }
