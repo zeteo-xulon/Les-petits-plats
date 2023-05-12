@@ -178,7 +178,7 @@ export class CreateIngredientList{
             this.li = createThis('li', 'recipe__ingredient__item');
             this.ingredientName = createThis('span', 'recipe__ingredient__name');
             this.ingredientName.innerText = item.ingredient + (item.quantity ? " : " : "");
-            this.ingredientQuantityAndUnit = (item.quantity ? item.quantity : null) + (item.unit ? theGoodUnit(item.unit) : null);
+            this.ingredientQuantityAndUnit = (item.quantity ? item.quantity : null) + (item.unit ? translatedUnit(item.unit) : null);
             this.ingredientName ? this.li.append(this.ingredientName) : null;
             this.ingredientQuantityAndUnit ? this.li.append(this.ingredientQuantityAndUnit) : null;
             return this.li;
@@ -196,14 +196,56 @@ export class CreateIngredientList{
  * @param {string} unit - the unit to verify
  * @returns {string} the unit that follow the figma model
  * @example
- * theGoodUnit("grammes") // return "g"
+ * translatedUnit("grammes") // return "g"
  */ 
-function theGoodUnit(unit){
+export function translatedUnit(unit){
     switch(unit){
         case "grammes" : return "g";
         case "cuillères à soupe" : return " cuillères";
         case "ml" : return "ml";
         case null : return null;
         default : return " "+ unit;
+    }
+}
+
+/**
+ * verify the argument name and return the bg color that follow the figma model
+ * @param {string} bgColor - the bg color to verify
+ * @returns {string} the bg color that follow the figma model
+ */
+export function translatedBg(bgColor){
+    switch(bgColor){
+        case "ingredients" : return "bg-blue";
+        case "appliance" : return "bg-green";
+        case "ustensils" : return "bg-red";
+        default : return null;
+    }
+}
+
+/**
+ * verify the argument name and return the arguments container
+ * @param {string} name - the argument name to verify
+ * @returns {html} the arguments container
+ */
+export function translatedArgumentsContainer(name){
+    switch(name){
+        case "ingredients" : return document.getElementById('ingredientsArguments');
+        case "appliance" : return document.getElementById('appliancesArguments');
+        case "ustensils" : return document.getElementById('ustensilsArguments');
+        default : return null;
+    }
+}
+
+/**
+ * verify the bg color and return the argument name
+ * @param {string} bgColor - the bg color to verify
+ * @returns {string} the argument name
+ */
+export function translatedArgument(bgColor){
+    switch(bgColor){
+        case "bg-blue" : return "ingredients";
+        case "bg-green" : return "appliance";
+        case "bg-red" : return "ustensils";
+        default : return null;
     }
 }

@@ -147,6 +147,17 @@ p.search__advanced__text {
     justify-content: space-between;
     align-items: flex-start;
 }
+.recipes__not-found{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    height: 20rem;
+    width: 100%;
+    margin: auto;
+    font-weight: 700;
+    color: #D04F4F;
+}
 .recipe__card{
     margin: 1rem 0;
     padding: 0;

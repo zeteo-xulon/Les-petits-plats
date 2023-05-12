@@ -1,5 +1,14 @@
-import { createImage, createThis, createThisInput, CreateRecipeCard } from "./common.js";
-
+import { 
+    createImage, 
+    createThis, 
+    createThisInput, 
+    CreateRecipeCard, 
+    translatedUnit, 
+    translatedBg, 
+    translatedArgumentsContainer, 
+    translatedArgument 
+} from "./common.js";
+const recipesSection = document.getElementById('recipes');
 const searchIngredients = document.getElementById('searchIngredients');
 const searchDevices = document.getElementById('searchDevices');
 const searchTools = document.getElementById('searchTools');
@@ -7,19 +16,19 @@ const searchBar = document.getElementById('searchBar');
 // const server = "./data/recipes.js"; == in case of backend server
 
 let argumentsSelected = [];
-let foundRecipes = [];
+let lastingRecipes = [];
 console.log(recipes);
 
 window.addEventListener('click', (e) => {
     e.preventDefault();
     if(e.target.id === "searchIngredientsArrow"){
-        return openOrCloseAdvancedSearch(e, searchIngredients, "searchIngredientsArrow", "searchIngredientsInput", "veuillez entrer un ingrédients", "Ingrédients");
+        return openOrCloseAdvancedSearch(e, searchIngredients, "ingredients", "searchIngredientsArrow", "searchIngredientsInput", "veuillez entrer un ingrédients", "Ingrédients");
     }
     if(e.target.id === "searchDevicesArrow"){
-        return openOrCloseAdvancedSearch(e, searchDevices, "searchDevicesArrow", "searchDevicesInput", "veuillez entrer le nom d'un appareils", "Appareils");
+        return openOrCloseAdvancedSearch(e, searchDevices, "appliance", "searchDevicesArrow", "searchDevicesInput", "veuillez entrer le nom d'un appareils", "Appareils");
     }
     if(e.target.id === "searchToolsArrow"){
-        return openOrCloseAdvancedSearch(e, searchTools, "searchToolsArrow", "searchToolsInput", "veuillez entrer un ustencil", "Ustencils");
+        return openOrCloseAdvancedSearch(e, searchTools, "ustensils", "searchToolsArrow", "searchToolsInput", "veuillez entrer un ustensil", "Ustensils");
     }
     if(e.target.classList.contains('argument__close')){
         return deleteArgument(e);
@@ -28,55 +37,36 @@ window.addEventListener('click', (e) => {
 
 searchBar.addEventListener('keyup', (e) => {
     e.preventDefault();
-
-    if(e.target.value.length > 2){
-        let search = e.target.value.toLowerCase();
-        let filtredRecipes = [];
-
-        /** en plusieur temps :
-        * 1. on filtre les recettes par nom de recette
-        * 2. on filtre les recettes par description de recette
-        * 3. on filtre les recettes par ingredients de recette
-        * 4. on affiche les recettes filtrées
-        * La méthode indexOf est utilisé car plus bas niveau et un peu plus rapide que includes 
-        */
-        for(let i = 0; i < recipes.length; i++){
-            const recipeName = recipes[i].name.toLowerCase();
-            const recipeIngredients = recipes[i].ingredients;
-            const recipeDescription = recipes[i].description.toLowerCase();
-
-            if(recipeName.indexOf(search) !== -1){ filtredRecipes.push(recipes[i]) }
-            else if(recipeDescription.indexOf(search) !== -1){ filtredRecipes.push(recipes[i]) }
-            else{
-                for(let j=0; j < recipeIngredients.length; j++){
-                const ingredientName = recipeIngredients[j].ingredient.toLowerCase();
-                if(ingredientName.indexOf(search) !== -1){ filtredRecipes.push(recipes[i]) }
-                } 
-            }
-        }
-        console.log(filtredRecipes)
-        foundRecipes = filtredRecipes;
-        return displayRecipesCards(filtredRecipes);
-    } else { 
-        return displayRecipesCards(recipes) 
-    }
+    const value = e.target.value;
+    const recipesFromMainSearchInput = searchFromMainSearchInput(value);
+    //verifier si il y a des arguments dans le conteneur d'arguments
+    const allArguments = getAllArguments();
+    if(allArguments.length > 0){
+        const recipesFromArguments = searchFromArgumentsAndFoundRecipes(allArguments, recipesFromMainSearchInput);
+        return displayRecipesCards(recipesFromArguments);
+    }    
+    if(recipesFromMainSearchInput.length === 0 && allArguments.length === 0){ return displayNoRecipeFound() }
+    displayRecipesCards(recipesFromMainSearchInput);
 })
+
 searchIngredients.addEventListener('keyup', (e) => {
     e.preventDefault();
     if(e.target.value.length > 2){
         let search = e.target.value.toLowerCase();
-        let filtredRecipes = [];
-        for(let i = 0; i < recipes.length; i++){
-            const recipeIngredients = recipes[i].ingredients;
+        let filtredOptions = [];
+        for(let i = 0; i < lastingRecipes.length; i++){
+            const recipeIngredients = lastingRecipes[i].ingredients;
             for(let j=0; j < recipeIngredients.length; j++){
                 const ingredientName = recipeIngredients[j].ingredient.toLowerCase();
-                if(ingredientName.indexOf(search) !== -1){ filtredRecipes.push(recipes[i]) }
+                if(ingredientName.indexOf(search) !== -1){ filtredOptions.push(recipes[i]) }
             }
         }
-        console.log(filtredRecipes)
-        return displayRecipesCards(filtredRecipes);
+        if(filtredOptions.length === 0){ return noOptionFound('ingredients') }
+        console.log(filtredOptions)
+        return displayOptions(filtredOptions, 'ingredients');
     } else {
-        return displayRecipesCards(recipes)
+        const options = findAllOptions("ingredients");
+        return displayOptions(options, 'ingredients');
     }
 })
 
@@ -105,6 +95,39 @@ const displayRecipesCards = (givenRecipes) => {
 
 displayRecipesCards(recipes);
 
+function searchFromMainSearchInput(value){
+    if(value.length > 2){
+        let search = value.toLowerCase();
+        let filtredRecipes = [];
+
+        /** en plusieur temps :
+        * 1. on filtre les recettes par nom de recette
+        * 2. on filtre les recettes par description de recette
+        * 3. on filtre les recettes par ingredients de recette
+        * 4. on affiche les recettes filtrées
+        * La méthode indexOf est utilisé car plus bas niveau et un peu plus rapide que includes 
+        */
+        for(let i = 0; i < recipes.length; i++){
+            const recipeName = recipes[i].name.toLowerCase();
+            const recipeIngredients = recipes[i].ingredients;
+            const recipeDescription = recipes[i].description.toLowerCase();
+
+            if(recipeName.indexOf(search) !== -1){ filtredRecipes.push(recipes[i]) }
+            else if(recipeDescription.indexOf(search) !== -1){ filtredRecipes.push(recipes[i]) }
+            else{
+                for(let j=0; j < recipeIngredients.length; j++){
+                const ingredientName = recipeIngredients[j].ingredient.toLowerCase();
+                if(ingredientName.indexOf(search) !== -1){ filtredRecipes.push(recipes[i]) }
+                } 
+            }
+        }
+        console.log(filtredRecipes)
+        lastingRecipes = filtredRecipes;
+        return filtredRecipes;
+    } else { 
+        return recipes;
+    }
+}
 /**
  * create a button with a specified argument received
  * @param {string} text - text to add to the button
@@ -142,16 +165,25 @@ function createAdvancedSearchButton(specificId, sens){
  *   Ingrédients
  * </div>
  */
-function openOrCloseAdvancedSearch(e, search, arrowId, inputId, placeholder, text){
+function openOrCloseAdvancedSearch(e, search, type, arrowId, inputId, placeholder, text){
+    const argumentContainer = translatedArgumentsContainer(type);
+    const bgColor = translatedBg(type);
+    console.log(argumentContainer)
     if(e.target.classList.contains("arrow-down")){
         closeAllAdvancedSearch();
         const btn = createAdvancedSearchButton(arrowId, "up");
         const input = createThisInput("search", "search__advanced__input", inputId, placeholder);
         search.innerHTML= "";
         search.appendChild(btn);
+        const allOption = findAllOptions(type);
+        for(let i = 0; i < allOption.length && i < 30; i++){
+            const optionBtn = createOption(allOption[i], bgColor);
+            argumentContainer.appendChild(optionBtn);
+        }
         return search.appendChild(input);
     }
     else if(e.target.classList.contains("arrow-up")){
+        argumentContainer.innerHTML = "";
         return close(search, arrowId, text);
     } 
 }
@@ -166,11 +198,23 @@ function close(search, arrowId, text){
     return search.appendChild(para);
 }
 
-// close all advanced search input and display text
+// close all advanced search input and display text and empty all arguments container
 function closeAllAdvancedSearch(){
     close(searchIngredients, "searchIngredientsArrow", "Ingrédients");
     close(searchDevices, "searchDevicesArrow", "Appareils");
     close(searchTools, "searchToolsArrow", "Ustencils");
+    emptyAllArgumentsContainer();
+}
+//empty all arguments container
+function emptyAllArgumentsContainer(){
+    emptyArgumentsContainer("ingredients");
+    emptyArgumentsContainer("appliance");
+    emptyArgumentsContainer("ustensils");
+}
+//empty arguments a unique container
+function emptyArgumentsContainer(type){
+    const argumentContainer = translatedArgumentsContainer(type);
+    argumentContainer.innerHTML = "";
 }
 
 // delete argument from the list and the DOM
@@ -201,4 +245,84 @@ function createArgument(bgColor, text){
     button.appendChild(span);
     button.appendChild(img);
     return button;
+}
+
+function displayNoRecipeFound(){
+    recipesSection.innerHTML = "";
+    const para = createThis('p', 'recipes__not-found', null, `Aucune recette ne correspond à votre critère… vous pouvez chercher « tarte aux pommes », « poisson », etc.`);
+    recipesSection.appendChild(para);
+}
+function noOptionFound(type){
+    const argumentContainer = translatedArgumentsContainer(type);
+    const bgColor = translatedBg(type);
+    argumentContainer.innerHTML = "";
+    const para = createThis('p', 'search__advanced__not-found txt-white ' + bgColor, null, `Aucun résultat ne correspond à votre recherche.`);
+    return argumentContainer.appendChild(para);
+}
+function displayAdvancedSearchOption(options){
+
+}
+function displayOptions(options, type){
+    const optionsContainer = translatedArgumentsContainer(type);
+    const bgColor = translatedBg(type);
+    optionsContainer.innerHTML = "";
+    if(options.length === 0){
+        return noOptionFound(optionsContainer, bgColor);
+    }
+    for(let i = 0; i < options.length && i < 30; i++){
+        const optionArgument = createOption(options[i], bgColor);
+        optionsContainer.appendChild(optionArgument);
+    }
+}
+
+/**
+ * create a button with a specified argument received
+ * @param {string} text - text to add to the button
+ * @param {string} className - string of class to add to the button
+ * @returns {object} button - button DOM element created
+ * example :
+ * <button class="search-btn txt-white bg-blue ingredients">Lait de coco</button>
+ */
+function createOption(option, bgColor){
+    const optionArgument = createThis('button', 'search-btn txt-white ' + bgColor, null, option);
+    return optionArgument;
+}
+
+function findAllOptions(type){
+    let optionArray = [];
+    let newSet = new Set();
+    for(let i = 0; i < recipes.length; i++){
+        if(type === "appliance"){ 
+            newSet.add(recipes[i].appliance)
+        } else if (type === "ingredients"){
+            for(let j = 0; j < recipes[i].ingredients.length; j++){
+               newSet.add(recipes[i].ingredients[j].ingredient);
+            } 
+        } else if(type === "ustensils"){
+            for(let j = 0; j < recipes[i].ustensils.length; j++){
+                newSet.add(recipes[i].ustensils[j]);
+            } 
+        }
+    }
+    optionArray = Array.from(newSet);
+    console.log(optionArray)
+    return optionArray;
+}
+// d'abord créer un tableau vide, puis aller checker le conteneur des arguments.
+// S'il y a des arguments, alors on les ajoute au tableau en spécifiant le type d'argument et l'argument lui-même
+function getAllArguments(){
+    let allArguments = [];
+    const argumentsSelected = document.querySelectorAll('.argument');
+    if(argumentsSelected.length > 0){
+        for(let i = 0; i < argumentsSelected.length; i++){
+            const argument = argumentsSelected[i];
+            const type = argument.parentElement.classList[1];
+            const translatedType = translatedArgument(type);
+            allArguments.push({translatedType, argument});
+        }
+    return allArguments;
+}
+
+function searchFromArgumentsAndFoundRecipes(arguments, recipes){
+
 }
