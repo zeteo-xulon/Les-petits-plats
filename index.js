@@ -315,16 +315,15 @@ function findAllOptions(type){
 function getAllArguments(){
     let allArguments = [];
     const argumentsSelected = document.querySelectorAll('.argument');
-    console.log(argumentsSelected)
-    if(argumentsSelected.length > 0){
-        for(let i = 0; i < argumentsSelected.length; i++){
-            const argument = argumentsSelected[i];
+    const thereIsArguments = argumentsSelected[0] == undefined ? false : true;
+    if(thereIsArguments){
+        for(let argument of argumentsSelected){
             const type = argument.parentElement.classList[2];
             const translatedType = translatedArgument(type);
             allArguments.push({translatedType, argument});
         }
-    return allArguments;
     }
+    return allArguments;
 }
 
 function searchFromArgumentsAndFoundRecipes(argumentsList, recipes){
