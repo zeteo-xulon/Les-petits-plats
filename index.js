@@ -13,25 +13,37 @@ const searchIngredients = document.getElementById('searchIngredients');
 const searchDevices = document.getElementById('searchDevices');
 const searchTools = document.getElementById('searchTools');
 const searchBar = document.getElementById('searchBar');
+const argumentsContainer = document.getElementById('argumentsContainer');
+const config = { childList: true };
+const containerObserver = new MutationObserver((mutation) => { 
+    console.log("got a mutation", mutation)
+    return onContainerChange() 
+});
 // const server = "./data/recipes.js"; == in case of backend server
 
-let argumentsSelected = [];
+let argumentsInContainer = [];
 let lastingRecipes = [];
 console.log(recipes);
+
+
+
 
 window.addEventListener('click', (e) => {
     e.preventDefault();
     if(e.target.id === "searchIngredientsArrow"){
-        return openOrCloseAdvancedSearch(e, searchIngredients, "ingredients", "searchIngredientsArrow", "searchIngredientsInput", "veuillez entrer un ingrédients", "Ingrédients");
+        return openOrCloseAdvancedSearch(e, searchIngredients, "ingredients", "searchIngredientsArrow", "searchIngredientsInput", "veuillez entrer un ingrédient", "Ingrédients");
     }
     if(e.target.id === "searchDevicesArrow"){
-        return openOrCloseAdvancedSearch(e, searchDevices, "appliance", "searchDevicesArrow", "searchDevicesInput", "veuillez entrer le nom d'un appareils", "Appareils");
+        return openOrCloseAdvancedSearch(e, searchDevices, "appliance", "searchDevicesArrow", "searchDevicesInput", "veuillez entrer le nom d'un appareil", "Appareils");
     }
     if(e.target.id === "searchToolsArrow"){
-        return openOrCloseAdvancedSearch(e, searchTools, "ustensils", "searchToolsArrow", "searchToolsInput", "veuillez entrer un ustensil", "Ustensils");
+        return openOrCloseAdvancedSearch(e, searchTools, "ustensils", "searchToolsArrow", "searchToolsInput", "veuillez entrer un ustensile", "Ustensiles");
     }
     if(e.target.classList.contains('argument__close')){
         return deleteArgument(e);
+    }
+    if(e.target.classList.contains('search-btn')){
+        return addArgument(e);
     }
 })
 
@@ -42,7 +54,6 @@ searchBar.addEventListener('keyup', (e) => {
     console.log(recipesFromMainSearchInput)
     //verifier si il y a des arguments dans le conteneur d'arguments
     const allArguments = getAllArguments();
-    console.log(allArguments)
     if(allArguments.length > 0){
         const recipesFromArguments = searchFromArgumentsAndFoundRecipes(allArguments, recipesFromMainSearchInput);
         return displayRecipesCards(recipesFromArguments);
@@ -55,23 +66,26 @@ searchIngredients.addEventListener('keyup', (e) => {
     e.preventDefault();
     if(e.target.value.length > 2){
         let search = e.target.value.toLowerCase();
-        let filtredOptions = [];
-        for(let i = 0; i < lastingRecipes.length; i++){
-            const recipeIngredients = lastingRecipes[i].ingredients;
+        let filtredRecipes = lastingRecipes.length !== 0 ? lastingRecipes : recipes;
+        let optionsSet = new Set();
+        for(let i = 0; i < filtredRecipes.length; i++){
+            const recipeIngredients = filtredRecipes[i].ingredients;
             for(let j=0; j < recipeIngredients.length; j++){
                 const ingredientName = recipeIngredients[j].ingredient.toLowerCase();
-                if(ingredientName.indexOf(search) !== -1){ filtredOptions.push(recipes[i]) }
+                if(ingredientName.indexOf(search) !== -1){ optionsSet.add(ingredientName) }
             }
         }
-        if(filtredOptions.length === 0){ return noOptionFound('ingredients') }
-        console.log(filtredOptions)
-        return displayOptions(filtredOptions, 'ingredients');
+        let translatedOptionsSetToArray = Array.from(optionsSet);
+        if(translatedOptionsSetToArray.length === 0){ return noOptionFound('ingredients') }
+        return displayOptions(translatedOptionsSetToArray, 'ingredients');
     } else {
         const options = findAllOptions("ingredients");
         return displayOptions(options, 'ingredients');
     }
 })
-
+document.addEventListener('DOMContentLoaded', () => {
+    containerObserver.observe(argumentsContainer, config);
+})
 
 
 const displayRecipesCards = (givenRecipes) => {
@@ -89,9 +103,7 @@ const displayRecipesCards = (givenRecipes) => {
 // ==========================
 // async function fetchServerData(server){
 //     const response = await fetch(server);
-//     console.log(response);
 //     const data = await response;
-//     console.log(data);
 //     return data;
 // }
 
@@ -123,7 +135,6 @@ function searchFromMainSearchInput(value){
                 } 
             }
         }
-        console.log(filtredRecipes)
         lastingRecipes = filtredRecipes;
         return filtredRecipes;
     } else { 
@@ -170,7 +181,6 @@ function createAdvancedSearchButton(specificId, sens){
 function openOrCloseAdvancedSearch(e, search, type, arrowId, inputId, placeholder, text){
     const argumentContainer = translatedArgumentsContainer(type);
     const bgColor = translatedBg(type);
-    console.log(argumentContainer)
     if(e.target.classList.contains("arrow-down")){
         closeAllAdvancedSearch();
         const btn = createAdvancedSearchButton(arrowId, "up");
@@ -221,10 +231,26 @@ function emptyArgumentsContainer(type){
 
 // delete argument from the list and the DOM
 function deleteArgument(e){
-    console.log(e)
-    console.log(e.target.parentElement.children[0].innerText)
-    const argument = e.target.parentElement.children[0].innerText;
-    const index = argumentsSelected.indexOf(argument);
+    const argument = e.target.parentElement.children[0].innerText.toLowerCase();
+    const index = argumentsInContainer.indexOf(argument);
+    argumentsInContainer.splice(index, 1);
+    return e.target.parentElement.remove();
+}
+
+function addArgument(e){
+    const argument = e.target.innerText;
+    getAllArguments();
+    if(argumentsInContainer.length === 0){ createAndDisplayArgument(e, argument) } 
+    else if (!argumentsInContainer.includes(argument.toLowerCase())){ createAndDisplayArgument(e, argument) } 
+    else { console.log("already in the list") }
+}
+
+function createAndDisplayArgument(e, argument){
+    const bgColor = e.target.classList[2];
+    let argumentsSet = new Set();
+    const createdArgument = createArgument(bgColor, argument);
+    argumentsContainer.appendChild(createdArgument);
+    argumentsSet.add(argument.toLowerCase());
 }
 /**
  * create a button with a specified argument received
@@ -254,6 +280,7 @@ function displayNoRecipeFound(){
     const para = createThis('p', 'recipes__not-found', null, `Aucune recette ne correspond à votre critère… vous pouvez chercher « tarte aux pommes », « poisson », etc.`);
     recipesSection.appendChild(para);
 }
+
 function noOptionFound(type){
     const argumentContainer = translatedArgumentsContainer(type);
     const bgColor = translatedBg(type);
@@ -261,9 +288,7 @@ function noOptionFound(type){
     const para = createThis('p', 'search__advanced__not-found txt-white ' + bgColor, null, `Aucun résultat ne correspond à votre recherche.`);
     return argumentContainer.appendChild(para);
 }
-function displayAdvancedSearchOption(options){
 
-}
 function displayOptions(options, type){
     const optionsContainer = translatedArgumentsContainer(type);
     const bgColor = translatedBg(type);
@@ -307,27 +332,29 @@ function findAllOptions(type){
         }
     }
     optionArray = Array.from(newSet);
-    console.log(optionArray)
     return optionArray;
 }
 // d'abord créer un tableau vide, puis aller checker le conteneur des arguments.
 // S'il y a des arguments, alors on les ajoute au tableau en spécifiant le type d'argument et l'argument lui-même
 function getAllArguments(){
-    let allArguments = [];
+    let allArguments = new Set();
     const argumentsSelected = document.querySelectorAll('.argument');
     const thereIsArguments = argumentsSelected[0] == undefined ? false : true;
     if(thereIsArguments){
         for(let argument of argumentsSelected){
-            const type = argument.parentElement.classList[2];
-            const translatedType = translatedArgument(type);
-            allArguments.push({translatedType, argument});
+            const argumentType = argument.classList[3];
+            const type = translatedArgument(argumentType);
+            const name = argument.innerText.toLowerCase();
+            allArguments.add({type, name});
         }
+        argumentsInContainer = Array.from(allArguments);
     }
-    return allArguments;
+    return argumentsInContainer;
 }
 
 function searchFromArgumentsAndFoundRecipes(argumentsList, recipes){
-    const finalRecipes = [];
+    console.log("la fonction s'est lancé ", argumentsList, recipes)
+    const recipesSet = new Set();
     // pour chaque recette on va vérifier si le premier argument est présent dans la recette
     // puis cela nous donnera un tableau de recettes qui contiennent le premier argument
     // puis on va vérifier si le deuxième argument est présent dans le tableau de recettes
@@ -335,23 +362,45 @@ function searchFromArgumentsAndFoundRecipes(argumentsList, recipes){
     for(let i = 0; i < recipes.length; i++){
         let stock = [];
         for(let j = 0; j < argumentsList.length; j++){
-            const argumentType = argumentsList[j].translatedType;
-            const argument = argumentsList[j].argument.innerText.toLowerCase();
+            const argumentType = argumentsList[j].type;
+            const argument = argumentsList[j].name;
             
             if(argumentType === "ingredients"){
                 const recipeArgument = recipes[i].ingredients[j].ingredient.toLowerCase()
-                if(argument === recipeArgument){ stock.push(recipes[i]) }
+                if(argument === recipeArgument){ recipesSet.add(recipes[i]) }
             }
 
             if(argumentType === "appliance"){
                 const recipeArgument = recipes[i].appliance.toLowerCase()
-                if(argument === recipeArgument){ stock.push(recipes[i]) }
+                if(argument === recipeArgument){ recipesSet.add(recipes[i]) }
             }
 
             if(argumentType === "ustensils"){
                 const recipeArgument = recipes[i].ustensils[j].toLowerCase()
-                if(argument === recipeArgument){ stock.push(recipes[i]) }
+                if(argument === recipeArgument){ recipesSet.add(recipes[i]) }
             }
         }
     }
+    let finalRecipes = Array.from(recipesSet)
+    console.log( finalRecipes)
+    return finalRecipes;
+}
+
+/** d'abord je verifie la barre de recherche, puis ensuite je récupère les arguments
+*   ensuite en utilisant le tableau de la recherche générale, je le couple avec les arguments récupéré, afin d'obtenir un tableau final
+*   ensuite je ferais un display des recettes restante */
+function onContainerChange(){
+    //  etape 1, rechercher dans le tableau de recherche principale et retourner un tableau suivant la recherche principale
+    const value = searchBar.value;
+    lastingRecipes = searchFromMainSearchInput(value);
+    //  etape 2, récupérer tous les arguments du container
+    const allArguments = getAllArguments(lastingRecipes);
+    //  etape 3, obtenir un tableau avec les recettes restante suivant le tableau restant de la barre principale + les arguments trouvés.
+    const recipesFound = searchFromArgumentsAndFoundRecipes(allArguments, lastingRecipes);
+    if(allArguments.length === 0 && value.length < 2 ){ 
+        lastingRecipes = recipes;
+        return displayRecipesCards(recipes) 
+    }
+    if(value.length > 2 && allArguments.length !== 0) { return displayNoRecipeFound()}
+    return displayRecipesCards(recipesFound);
 }
