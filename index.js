@@ -6,7 +6,10 @@ import {
     translatedUnit, 
     translatedBg, 
     translatedArgumentsContainer, 
-    translatedArgument 
+    translatedArgument,
+    createAdvancedSearchButton,
+    createOption,
+    createArgument
 } from "./common.js";
 const recipesSection = document.getElementById('recipes');
 const searchIngredients = document.getElementById('searchIngredients');
@@ -16,7 +19,6 @@ const searchBar = document.getElementById('searchBar');
 const argumentsContainer = document.getElementById('argumentsContainer');
 const config = { childList: true };
 const containerObserver = new MutationObserver((mutation) => { 
-    console.log("got a mutation", mutation)
     return onContainerChange() 
 });
 // const server = "./data/recipes.js"; == in case of backend server
@@ -24,8 +26,6 @@ const containerObserver = new MutationObserver((mutation) => {
 let argumentsInContainer = [];
 let lastingRecipes = [];
 console.log(recipes);
-
-
 
 
 window.addEventListener('click', (e) => {
@@ -43,23 +43,15 @@ window.addEventListener('click', (e) => {
         return deleteArgument(e);
     }
     if(e.target.classList.contains('search-btn')){
-        return addArgument(e);
+        return addArgument(e) 
     }
 })
 
 searchBar.addEventListener('keyup', (e) => {
     e.preventDefault();
-    const value = e.target.value;
-    const recipesFromMainSearchInput = searchFromMainSearchInput(value);
-    console.log(recipesFromMainSearchInput)
-    //verifier si il y a des arguments dans le conteneur d'arguments
-    const allArguments = getAllArguments();
-    if(allArguments.length > 0){
-        const recipesFromArguments = searchFromArgumentsAndFoundRecipes(allArguments, recipesFromMainSearchInput);
-        return displayRecipesCards(recipesFromArguments);
-    }    
-    if(recipesFromMainSearchInput.length === 0 && allArguments.length === 0){ return displayNoRecipeFound() }
-    displayRecipesCards(recipesFromMainSearchInput);
+    search();
+    console.log(lastingRecipes)
+    return checkAndDisplay();
 })
 
 searchIngredients.addEventListener('keyup', (e) => {
@@ -87,76 +79,69 @@ document.addEventListener('DOMContentLoaded', () => {
     containerObserver.observe(argumentsContainer, config);
 })
 
-
-const displayRecipesCards = (givenRecipes) => {
-    // const recipes = await fetchServerData(server);  == in case of backend server
-    const recipesCards = document.getElementById('recipes');
-    recipesCards.innerHTML = "";
-    givenRecipes.forEach(recipe => {
-        const cardModel = new CreateRecipeCard(recipe);
-        const card = cardModel.render();
-        recipesCards.appendChild(card);
-    });
-}
-
-// in case of backend server
-// ==========================
-// async function fetchServerData(server){
-//     const response = await fetch(server);
-//     const data = await response;
-//     return data;
-// }
-
 displayRecipesCards(recipes);
 
+
+
+
+
+// === SEARCH'S ===
+
+/** function qui vérifie tous les conteneurs de recherche
+ * Premierement ça va lancer une recherche avec le contenu de la barre de recherche principale
+ * puis ça va vérifier dans le conteneur a argument son contenu, 
+ * en lui passant le résultat de la recherche principale
+ * cette fonction se lance à chaque fois qu'il y a un changement dans l'input de la barre de recherche
+ * ou a chaque fois qu'un argument est ajouté
+ * 
+ * Case :
+ * 1 - la barre de recherche a moins de 3 caractères, on envoi donc le tableau des recettes entier
+ * 2 - la barre de recherche a 3 caractères ou plus, et on a des recettes trouvé, on envoi ce tableau
+ * 3 - la barre de recherche a 3 caractères ou plus, et on a pas de recettes trouvé, on affiche le message "aucune recettes correspond a la recherche."
+ * 
+ * 4 - il n'y a pas d'arguments dans le conteneur, on affiche les résultat reçu par la barre de recherche principale
+ * 5 - il y a des arguments dans le conteneur, on tri les recettes avec le tableau reçu, il reste des recettes, et on les affiches
+ * 6 - il y a des arguments dans le conteneur, on tri les recettes avec le tableau reçu, il ne reste PAS de recettes. on affiche le message "aucune recettes correspond a la recherche."
+ */
+function search(){
+    let searchBarInputContent = document.getElementById('searchBar').value;
+    // case 1,2,3
+    searchFromMainSearchInput(searchBarInputContent)
+    if(lastingRecipes.length === 0){ return displayNoRecipeFound }
+    // case 4,5,6
+    getAllArguments()
+}
+
+/**
+ * 1. on filtre les recettes par nom de recette
+* 2. on filtre les recettes par description de recette
+* 3. on filtre les recettes par ingredients de recette
+* 4. on affiche les recettes filtrées
+* La méthode indexOf est utilisé car plus bas niveau et un peu plus rapide que includes
+ * @param {String} value - ce qui est tapé dans l'input de la barre de recherche principale 
+ * @returns le tableau selon la recherche ou celui par défaut.
+ */
 function searchFromMainSearchInput(value){
     if(value.length > 2){
         let search = value.toLowerCase();
-        let filtredRecipes = [];
-
-        /** en plusieur temps :
-        * 1. on filtre les recettes par nom de recette
-        * 2. on filtre les recettes par description de recette
-        * 3. on filtre les recettes par ingredients de recette
-        * 4. on affiche les recettes filtrées
-        * La méthode indexOf est utilisé car plus bas niveau et un peu plus rapide que includes 
-        */
+        let recipesSet = new Set();
         for(let i = 0; i < recipes.length; i++){
             const recipeName = recipes[i].name.toLowerCase();
             const recipeIngredients = recipes[i].ingredients;
             const recipeDescription = recipes[i].description.toLowerCase();
-
-            if(recipeName.indexOf(search) !== -1){ filtredRecipes.push(recipes[i]) }
-            else if(recipeDescription.indexOf(search) !== -1){ filtredRecipes.push(recipes[i]) }
+            if(recipeName.indexOf(search) !== -1){ recipesSet.add(recipes[i]) }
+            else if(recipeDescription.indexOf(search) !== -1){ recipesSet.add(recipes[i]) }
             else{
                 for(let j=0; j < recipeIngredients.length; j++){
                 const ingredientName = recipeIngredients[j].ingredient.toLowerCase();
-                if(ingredientName.indexOf(search) !== -1){ filtredRecipes.push(recipes[i]) }
+                if(ingredientName.indexOf(search) !== -1){ recipesSet.add(recipes[i]) }
                 } 
             }
         }
-        lastingRecipes = filtredRecipes;
-        return filtredRecipes;
-    } else { 
-        return recipes;
-    }
-}
-/**
- * create a button with a specified argument received
- * @param {string} text - text to add to the button
- * @param {string} className - string of class to add to the button
- * @param {string} id - id to add to the button
- * @returns {object} button - button DOM element created
- * example :
- * <button class="btn btn-transparent" id="searchIngredientsArrow">
- *     <img src="./assets/chevron_white.png" alt="flèche vers le bas, ouvrir la recherche" class="arrow arrow-down" >
- * </button>
- */ 
-function createAdvancedSearchButton(specificId, sens){
-    const button = createThis('button', 'btn-transparent');
-    const img = createImage('./assets/chevron_white.png', 'flèche vers le bas, ouvrir la recherche', 'arrow arrow-'+sens ,specificId);
-    button.appendChild(img);
-    return button;
+        let filtredRecipes = Array.from(recipesSet)
+        return lastingRecipes = filtredRecipes;
+    } 
+    else { return lastingRecipes = recipes; }
 }
 
 /**
@@ -217,16 +202,105 @@ function closeAllAdvancedSearch(){
     close(searchTools, "searchToolsArrow", "Ustencils");
     emptyAllArgumentsContainer();
 }
-//empty all arguments container
-function emptyAllArgumentsContainer(){
-    emptyArgumentsContainer("ingredients");
-    emptyArgumentsContainer("appliance");
-    emptyArgumentsContainer("ustensils");
+
+function searchFromArgumentsAndFoundRecipes(argumentsList, recipes){
+    const recipesSet = new Set();
+    // pour chaque recette on va vérifier si le premier argument est présent dans la recette
+    // puis cela nous donnera un tableau de recettes qui contiennent le premier argument
+    // puis on va vérifier si le deuxième argument est présent dans le tableau de recettes
+    // et ainsi de suite
+    for(let i = 0; i < recipes.length; i++){
+        // boucler sur la bonne propriété de recipes plutôt que argumentsList
+        // puis boucler dans les arguments de argumentsList ??
+
+        if( argumentsList[i].type === "ingredients"){
+            for(let j = 0; j < recipes[i].ingredients.length; j++){
+                let recipeArgumentName = recipes[i].ingredients[j].ingredient.toLowerCase();
+                for(let k=0; k< argumentsList.length; k++){
+                    let argumentFromListName = argumentsList[k].name.toLowerCase();
+                    if(recipeArgumentName === argumentFromListName){ recipesSet.add(recipes[i]) }
+                }
+            }
+        }
+        else if( argumentsList[i].type === "appliance"){
+            for(let j = 0; j < recipes[i].appliance.length; j++){
+                let recipeArgumentName = recipes[i].appliance.toLowerCase();
+                for(let k=0; k< argumentsList.length; k++){
+                    let argumentFromListName = argumentsList[k].name.toLowerCase();
+                    if(recipeArgumentName === argumentFromListName){ recipesSet.add(recipes[i]) }
+                }
+            }
+        }
+        else if( argumentsList[i].type === "ustensils"){
+            for(let j = 0; j < recipes[i].ustensils[j].length; j++){
+                let recipeArgumentName = recipes[i].ustensils[j].toLowerCase();
+                for(let k=0; k< argumentsList.length; k++){
+                    let argumentFromListName = argumentsList[k].name.toLowerCase();
+                    if(recipeArgumentName === argumentFromListName){ recipesSet.add(recipes[i]) }
+                }
+            }
+        }
+        else{
+            console.log("this is not a valid arguments type.")
+        }
+
+
+
+        // for(let j = 0; j < argumentsList.length; j++){
+        //     const argumentType = argumentsList[j].type;
+        //     const argument = argumentsList[j].name;
+            
+        //     if(argumentType === "ingredients"){
+        //         console.log(recipes[i])
+        //         const recipeArgument = recipes[i].ingredients[j].ingredient.toLowerCase()
+        //         if(argument === recipeArgument){ recipesSet.add(recipes[i]) }
+        //     }
+
+        //     if(argumentType === "appliance"){
+        //         const recipeArgument = recipes[i].appliance.toLowerCase()
+        //         if(argument === recipeArgument){ recipesSet.add(recipes[i]) }
+        //     }
+
+        //     if(argumentType === "ustensils"){
+        //         const recipeArgument = recipes[i].ustensils[j].toLowerCase()
+        //         if(argument === recipeArgument){ recipesSet.add(recipes[i]) }
+        //     }
+        // }
+    }
+    let finalRecipes = Array.from(recipesSet)
+    console.log( finalRecipes)
+    return finalRecipes;
 }
-//empty arguments a unique container
-function emptyArgumentsContainer(type){
-    const argumentContainer = translatedArgumentsContainer(type);
-    argumentContainer.innerHTML = "";
+
+
+//=== ARGUMENTS ===
+
+// d'abord créer un tableau vide, puis aller checker le conteneur des arguments.
+// S'il y a des arguments, alors on les ajoute au tableau en spécifiant le type d'argument et l'argument lui-même
+function getAllArguments(){
+    let allArguments = new Set();
+    const argumentsSelected = document.querySelectorAll('.argument');
+    const thereIsArguments = argumentsSelected[0] == undefined ? false : true;
+    if(thereIsArguments){
+        for(let argument of argumentsSelected){
+            const argumentType = argument.classList[3];
+            const type = translatedArgument(argumentType);
+            const name = argument.innerText.toLowerCase();
+            allArguments.add({type, name});
+        }
+        argumentsInContainer = Array.from(allArguments);
+    }
+}
+
+function addArgument(e, isAlreadyInList=false){
+    const argument = e.target.innerText;
+    let allArguments = getAllArguments();
+    for(let i=0; i< allArguments.length; i++){ 
+        if(allArguments[i].name === argument.toLowerCase()){  isAlreadyInList = true } 
+    }
+    if(allArguments.length === 0){ createAndDisplayArgument(e, argument) } 
+    else if (!isAlreadyInList){ createAndDisplayArgument(e, argument) } 
+    else { console.log("already in the list") }
 }
 
 // delete argument from the list and the DOM
@@ -237,56 +311,45 @@ function deleteArgument(e){
     return e.target.parentElement.remove();
 }
 
-function addArgument(e){
-    const argument = e.target.innerText;
-    getAllArguments();
-    if(argumentsInContainer.length === 0){ createAndDisplayArgument(e, argument) } 
-    else if (!argumentsInContainer.includes(argument.toLowerCase())){ createAndDisplayArgument(e, argument) } 
-    else { console.log("already in the list") }
+//empty all arguments container
+function emptyAllArgumentsContainer(){
+    emptyArgumentsContainer("ingredients");
+    emptyArgumentsContainer("appliance");
+    emptyArgumentsContainer("ustensils");
 }
 
-function createAndDisplayArgument(e, argument){
-    const bgColor = e.target.classList[2];
-    let argumentsSet = new Set();
-    const createdArgument = createArgument(bgColor, argument);
-    argumentsContainer.appendChild(createdArgument);
-    argumentsSet.add(argument.toLowerCase());
+//empty arguments a unique container
+function emptyArgumentsContainer(type){
+    const argumentContainer = translatedArgumentsContainer(type);
+    argumentContainer.innerHTML = "";
 }
-/**
- * create a button with a specified argument received
- * @param {string} text - text to add to the button
- * @param {string} className - string of class to add to the button
- * @returns {object} button - button DOM element created
- * example :
- *  
- <btn class="btn argument bg-blue txt-white">
-    <span class="argument__text">Coco</span>
-    <img src="./assets/white_circle_delete_icon.png" alt="delete cross" class="argument__close" height="20" width="20">
-</btn>
-*/
-function createArgument(bgColor, text){
-    const button = createThis('button', 'btn argument txt-white ' + bgColor);
-    const span = createThis('span', 'argument__text', null, text);
-    const img = createImage('./assets/white_circle_delete_icon.png', 'delete cross', 'argument__close');
-    img.height = 20;
-    img.width = 20;
-    button.appendChild(span);
-    button.appendChild(img);
-    return button;
+
+
+// === DISPLAYS ===
+function checkAndDisplay(){
+    if(argumentsInContainer.length > 0){
+        const recipesFromArguments = searchFromArgumentsAndFoundRecipes(argumentsInContainer, lastingRecipes);
+        return displayRecipesCards(recipesFromArguments);
+    }    
+    if(lastingRecipes.length === 0){ return displayNoRecipeFound() }
+    displayRecipesCards(lastingRecipes);
+}
+
+function displayRecipesCards(givenRecipes) {
+    // const recipes = await fetchServerData(server);  == in case of backend server
+    const recipesCards = document.getElementById('recipes');
+    recipesCards.innerHTML = "";
+    givenRecipes.forEach(recipe => {
+        const cardModel = new CreateRecipeCard(recipe);
+        const card = cardModel.render();
+        recipesCards.appendChild(card);
+    });
 }
 
 function displayNoRecipeFound(){
     recipesSection.innerHTML = "";
     const para = createThis('p', 'recipes__not-found', null, `Aucune recette ne correspond à votre critère… vous pouvez chercher « tarte aux pommes », « poisson », etc.`);
     recipesSection.appendChild(para);
-}
-
-function noOptionFound(type){
-    const argumentContainer = translatedArgumentsContainer(type);
-    const bgColor = translatedBg(type);
-    argumentContainer.innerHTML = "";
-    const para = createThis('p', 'search__advanced__not-found txt-white ' + bgColor, null, `Aucun résultat ne correspond à votre recherche.`);
-    return argumentContainer.appendChild(para);
 }
 
 function displayOptions(options, type){
@@ -302,19 +365,8 @@ function displayOptions(options, type){
     }
 }
 
-/**
- * create a button with a specified argument received
- * @param {string} text - text to add to the button
- * @param {string} className - string of class to add to the button
- * @returns {object} button - button DOM element created
- * example :
- * <button class="search-btn txt-white bg-blue ingredients">Lait de coco</button>
- */
-function createOption(option, bgColor){
-    const optionArgument = createThis('button', 'search-btn txt-white ' + bgColor, null, option);
-    return optionArgument;
-}
 
+//=== OPTIONS ===
 function findAllOptions(type){
     let optionArray = [];
     let newSet = new Set();
@@ -334,57 +386,16 @@ function findAllOptions(type){
     optionArray = Array.from(newSet);
     return optionArray;
 }
-// d'abord créer un tableau vide, puis aller checker le conteneur des arguments.
-// S'il y a des arguments, alors on les ajoute au tableau en spécifiant le type d'argument et l'argument lui-même
-function getAllArguments(){
-    let allArguments = new Set();
-    const argumentsSelected = document.querySelectorAll('.argument');
-    const thereIsArguments = argumentsSelected[0] == undefined ? false : true;
-    if(thereIsArguments){
-        for(let argument of argumentsSelected){
-            const argumentType = argument.classList[3];
-            const type = translatedArgument(argumentType);
-            const name = argument.innerText.toLowerCase();
-            allArguments.add({type, name});
-        }
-        argumentsInContainer = Array.from(allArguments);
-    }
-    return argumentsInContainer;
+
+function noOptionFound(type){
+    const argumentContainer = translatedArgumentsContainer(type);
+    const bgColor = translatedBg(type);
+    argumentContainer.innerHTML = "";
+    const para = createThis('p', 'search__advanced__not-found txt-white ' + bgColor, null, `Aucun résultat ne correspond à votre recherche.`);
+    return argumentContainer.appendChild(para);
 }
 
-function searchFromArgumentsAndFoundRecipes(argumentsList, recipes){
-    console.log("la fonction s'est lancé ", argumentsList, recipes)
-    const recipesSet = new Set();
-    // pour chaque recette on va vérifier si le premier argument est présent dans la recette
-    // puis cela nous donnera un tableau de recettes qui contiennent le premier argument
-    // puis on va vérifier si le deuxième argument est présent dans le tableau de recettes
-    // et ainsi de suite
-    for(let i = 0; i < recipes.length; i++){
-        let stock = [];
-        for(let j = 0; j < argumentsList.length; j++){
-            const argumentType = argumentsList[j].type;
-            const argument = argumentsList[j].name;
-            
-            if(argumentType === "ingredients"){
-                const recipeArgument = recipes[i].ingredients[j].ingredient.toLowerCase()
-                if(argument === recipeArgument){ recipesSet.add(recipes[i]) }
-            }
 
-            if(argumentType === "appliance"){
-                const recipeArgument = recipes[i].appliance.toLowerCase()
-                if(argument === recipeArgument){ recipesSet.add(recipes[i]) }
-            }
-
-            if(argumentType === "ustensils"){
-                const recipeArgument = recipes[i].ustensils[j].toLowerCase()
-                if(argument === recipeArgument){ recipesSet.add(recipes[i]) }
-            }
-        }
-    }
-    let finalRecipes = Array.from(recipesSet)
-    console.log( finalRecipes)
-    return finalRecipes;
-}
 
 /** d'abord je verifie la barre de recherche, puis ensuite je récupère les arguments
 *   ensuite en utilisant le tableau de la recherche générale, je le couple avec les arguments récupéré, afin d'obtenir un tableau final
@@ -394,13 +405,23 @@ function onContainerChange(){
     const value = searchBar.value;
     lastingRecipes = searchFromMainSearchInput(value);
     //  etape 2, récupérer tous les arguments du container
-    const allArguments = getAllArguments(lastingRecipes);
+    getAllArguments(lastingRecipes);
     //  etape 3, obtenir un tableau avec les recettes restante suivant le tableau restant de la barre principale + les arguments trouvés.
-    const recipesFound = searchFromArgumentsAndFoundRecipes(allArguments, lastingRecipes);
-    if(allArguments.length === 0 && value.length < 2 ){ 
+    const recipesFound = searchFromArgumentsAndFoundRecipes(argumentsInContainer, lastingRecipes);
+    if(argumentsInContainer.length === 0 && value.length < 2 ){ 
         lastingRecipes = recipes;
         return displayRecipesCards(recipes) 
     }
-    if(value.length > 2 && allArguments.length !== 0) { return displayNoRecipeFound()}
+
+    if(value.length > 2 && argumentsInContainer.length !== 0) { return displayNoRecipeFound()}
     return displayRecipesCards(recipesFound);
 }
+
+
+// in case of backend server
+// ==========================
+// async function fetchServerData(server){
+//     const response = await fetch(server);
+//     const data = await response;
+//     return data;
+// }

@@ -80,7 +80,71 @@ function createClassArray(className){
     return listOfClass;
 }
 
+/**
+ * Create and display an argument in the DOM
+ * @param {Object} e - the HTML object
+ * @param {String} argument - the argument text
+ * @returns the created argument in the container
+ */
+export function createAndDisplayArgument(e, argument){
+    const bgColor = e.target.classList[2];
+    const createdArgument = createArgument(bgColor, argument);
+    return argumentsContainer.appendChild(createdArgument);
+}
 
+/**
+ * create a button with a specified argument received
+ * @param {string} text - text to add to the button
+ * @param {string} className - string of class to add to the button
+ * @param {string} id - id to add to the button
+ * @returns {object} button - button DOM element created
+ * example :
+ * <button class="btn btn-transparent" id="searchIngredientsArrow">
+ *     <img src="./assets/chevron_white.png" alt="flèche vers le bas, ouvrir la recherche" class="arrow arrow-down" >
+ * </button>
+ */ 
+export function createAdvancedSearchButton(specificId, sens){
+    const button = createThis('button', 'btn-transparent');
+    const img = createImage('./assets/chevron_white.png', 'flèche vers le bas, ouvrir la recherche', 'arrow arrow-'+sens ,specificId);
+    button.appendChild(img);
+    return button;
+}
+
+/**
+ * create a button with a specified argument received
+ * @param {string} text - text to add to the button
+ * @param {string} className - string of class to add to the button
+ * @returns {object} button - button DOM element created
+ * example :
+ *  
+ <btn class="btn argument bg-blue txt-white">
+    <span class="argument__text">Coco</span>
+    <img src="./assets/white_circle_delete_icon.png" alt="delete cross" class="argument__close" height="20" width="20">
+</btn>
+*/
+export function createArgument(bgColor, text){
+    const button = createThis('button', 'btn argument txt-white ' + bgColor);
+    const span = createThis('span', 'argument__text', null, text);
+    const img = createImage('./assets/white_circle_delete_icon.png', 'delete cross', 'argument__close');
+    img.height = 20;
+    img.width = 20;
+    button.appendChild(span);
+    button.appendChild(img);
+    return button;
+}
+
+/**
+ * create a button with a specified argument received
+ * @param {string} text - text to add to the button
+ * @param {string} className - string of class to add to the button
+ * @returns {object} button - button DOM element created
+ * example :
+ * <button class="search-btn txt-white bg-blue ingredients">Lait de coco</button>
+ */
+export function createOption(option, bgColor){
+    const optionArgument = createThis('button', 'search-btn txt-white ' + bgColor, null, option);
+    return optionArgument;
+}
 /**
  * create a recipe card from a recipe model and return it
  * @param {object} recipe - recipe model
