@@ -1,3 +1,5 @@
+// ==== CREATION ====
+
 /**
  * create an element with a specified argument received
  * @param {string} elementType - type of element to create
@@ -255,6 +257,10 @@ export class CreateIngredientList{
     }
 }
 
+
+
+// === TRANSLATION ===
+
 /**
  * Verify the unit and return a version of the unit that follow the figma model
  * @param {string} unit - the unit to verify
@@ -312,4 +318,9 @@ export function translatedArgument(bgColor){
         case "bg-red" : return "ustensils";
         default : return null;
     }
+}
+export function translateInput(e){
+    if(e.target.id === "searchIngredientsInput"){ return "ingredients"}
+    if(e.target.id === "searchDevicesInput"){ return "appliance"}
+    if(e.target.id === "searchToolsInput"){ return "ustensils"}
 }

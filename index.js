@@ -9,7 +9,9 @@ import {
     translatedArgument,
     createAdvancedSearchButton,
     createOption,
-    createArgument
+    createArgument,
+    createAndDisplayArgument,
+    translateInput
 } from "./common.js";
 const recipesSection = document.getElementById('recipes');
 const searchIngredients = document.getElementById('searchIngredients');
@@ -21,7 +23,7 @@ const config = { childList: true };
 const containerObserver = new MutationObserver((mutation) => { 
     return onContainerChange() 
 });
-// const server = "./data/recipes.js"; == in case of backend server
+
 
 let argumentsInContainer = [];
 let lastingRecipes = [];
@@ -56,6 +58,7 @@ searchBar.addEventListener('keyup', (e) => {
 
 searchIngredients.addEventListener('keyup', (e) => {
     e.preventDefault();
+    console.log(e.target.id)
     if(e.target.value.length > 2){
         let search = e.target.value.toLowerCase();
         let filtredRecipes = lastingRecipes.length !== 0 ? lastingRecipes : recipes;
@@ -75,14 +78,48 @@ searchIngredients.addEventListener('keyup', (e) => {
         return displayOptions(options, 'ingredients');
     }
 })
+
+function searchOptions(e){
+    let type = translateInput;
+    if(e.target.value.length > 2){
+        console.log(e.target.id)
+        let search = e.target.value.toLowerCase();
+        let filtredRecipes = lastingRecipes.length !== 0 ? lastingRecipes : recipes;
+        let optionsSet = new Set();
+        for(let i = 0; i < filtredRecipes.length; i++){
+            const recipeIngredients = filtredRecipes[i].ingredients;
+            for(let j=0; j < recipeIngredients.length; j++){
+                const ingredientName = recipeIngredients[j].ingredient.toLowerCase();
+                if(ingredientName.indexOf(search) !== -1){ optionsSet.add(ingredientName) }
+            }
+        }
+        let translatedOptionsSetToArray = Array.from(optionsSet);
+        if(translatedOptionsSetToArray.length === 0){ return noOptionFound('ingredients') }
+        return displayOptions(translatedOptionsSetToArray, 'ingredients');
+    } else {
+        const options = findAllOptions("ingredients");
+        return displayOptions(options, 'ingredients');
+    }
+}
+
+
+
+
+
+
+
+
 document.addEventListener('DOMContentLoaded', () => {
     containerObserver.observe(argumentsContainer, config);
 })
 
+
+// TODO : débugger les arguments qui s'additionne au lieu de soustraire
+// TODO : faire le schema algorithmique
+
+
+
 displayRecipesCards(recipes);
-
-
-
 
 
 // === SEARCH'S ===
@@ -213,59 +250,31 @@ function searchFromArgumentsAndFoundRecipes(argumentsList, recipes){
         // boucler sur la bonne propriété de recipes plutôt que argumentsList
         // puis boucler dans les arguments de argumentsList ??
 
-        if( argumentsList[i].type === "ingredients"){
-            for(let j = 0; j < recipes[i].ingredients.length; j++){
-                let recipeArgumentName = recipes[i].ingredients[j].ingredient.toLowerCase();
-                for(let k=0; k< argumentsList.length; k++){
-                    let argumentFromListName = argumentsList[k].name.toLowerCase();
+
+        for(let l=0; l< argumentsList.length; l++){
+
+            if( argumentsList[l].type === "ingredients"){
+                for(let j = 0; j < recipes[i].ingredients.length; j++){
+                    let recipeArgumentName = recipes[i].ingredients[j].ingredient.toLowerCase();
+                    let argumentFromListName = argumentsList[l].name.toLowerCase();
                     if(recipeArgumentName === argumentFromListName){ recipesSet.add(recipes[i]) }
                 }
             }
-        }
-        else if( argumentsList[i].type === "appliance"){
-            for(let j = 0; j < recipes[i].appliance.length; j++){
-                let recipeArgumentName = recipes[i].appliance.toLowerCase();
-                for(let k=0; k< argumentsList.length; k++){
-                    let argumentFromListName = argumentsList[k].name.toLowerCase();
+            else if( argumentsList[l].type === "appliance"){
+                    let recipeArgumentName = recipes[i].appliance.toLowerCase();
+                    let argumentFromListName = argumentsList[l].name.toLowerCase();
+                    if(recipeArgumentName === argumentFromListName){ recipesSet.add(recipes[i]) }
+            }
+            else if( argumentsList[l].type === "ustensils"){
+                for(let j = 0; j < recipes[i].ustensils.length; j++){
+                    let recipeArgumentName = recipes[i].ustensils[j].toLowerCase();
+                    let argumentFromListName = argumentsList[l].name.toLowerCase();
                     if(recipeArgumentName === argumentFromListName){ recipesSet.add(recipes[i]) }
                 }
             }
-        }
-        else if( argumentsList[i].type === "ustensils"){
-            for(let j = 0; j < recipes[i].ustensils[j].length; j++){
-                let recipeArgumentName = recipes[i].ustensils[j].toLowerCase();
-                for(let k=0; k< argumentsList.length; k++){
-                    let argumentFromListName = argumentsList[k].name.toLowerCase();
-                    if(recipeArgumentName === argumentFromListName){ recipesSet.add(recipes[i]) }
-                }
-            }
-        }
-        else{
-            console.log("this is not a valid arguments type.")
-        }
+            else{ console.log("this is not a valid arguments type.") }
 
-
-
-        // for(let j = 0; j < argumentsList.length; j++){
-        //     const argumentType = argumentsList[j].type;
-        //     const argument = argumentsList[j].name;
-            
-        //     if(argumentType === "ingredients"){
-        //         console.log(recipes[i])
-        //         const recipeArgument = recipes[i].ingredients[j].ingredient.toLowerCase()
-        //         if(argument === recipeArgument){ recipesSet.add(recipes[i]) }
-        //     }
-
-        //     if(argumentType === "appliance"){
-        //         const recipeArgument = recipes[i].appliance.toLowerCase()
-        //         if(argument === recipeArgument){ recipesSet.add(recipes[i]) }
-        //     }
-
-        //     if(argumentType === "ustensils"){
-        //         const recipeArgument = recipes[i].ustensils[j].toLowerCase()
-        //         if(argument === recipeArgument){ recipesSet.add(recipes[i]) }
-        //     }
-        // }
+        } 
     }
     let finalRecipes = Array.from(recipesSet)
     console.log( finalRecipes)
@@ -294,11 +303,11 @@ function getAllArguments(){
 
 function addArgument(e, isAlreadyInList=false){
     const argument = e.target.innerText;
-    let allArguments = getAllArguments();
-    for(let i=0; i< allArguments.length; i++){ 
-        if(allArguments[i].name === argument.toLowerCase()){  isAlreadyInList = true } 
+    getAllArguments();
+    for(let i=0; i< argumentsInContainer.length; i++){ 
+        if(argumentsInContainer[i].name === argument.toLowerCase()){  isAlreadyInList = true } 
     }
-    if(allArguments.length === 0){ createAndDisplayArgument(e, argument) } 
+    if(argumentsInContainer.length === 0){ createAndDisplayArgument(e, argument) } 
     else if (!isAlreadyInList){ createAndDisplayArgument(e, argument) } 
     else { console.log("already in the list") }
 }
@@ -351,7 +360,6 @@ function displayNoRecipeFound(){
     const para = createThis('p', 'recipes__not-found', null, `Aucune recette ne correspond à votre critère… vous pouvez chercher « tarte aux pommes », « poisson », etc.`);
     recipesSection.appendChild(para);
 }
-
 function displayOptions(options, type){
     const optionsContainer = translatedArgumentsContainer(type);
     const bgColor = translatedBg(type);
@@ -364,7 +372,6 @@ function displayOptions(options, type){
         optionsContainer.appendChild(optionArgument);
     }
 }
-
 
 //=== OPTIONS ===
 function findAllOptions(type){
@@ -396,7 +403,6 @@ function noOptionFound(type){
 }
 
 
-
 /** d'abord je verifie la barre de recherche, puis ensuite je récupère les arguments
 *   ensuite en utilisant le tableau de la recherche générale, je le couple avec les arguments récupéré, afin d'obtenir un tableau final
 *   ensuite je ferais un display des recettes restante */
@@ -416,12 +422,3 @@ function onContainerChange(){
     if(value.length > 2 && argumentsInContainer.length !== 0) { return displayNoRecipeFound()}
     return displayRecipesCards(recipesFound);
 }
-
-
-// in case of backend server
-// ==========================
-// async function fetchServerData(server){
-//     const response = await fetch(server);
-//     const data = await response;
-//     return data;
-// }
