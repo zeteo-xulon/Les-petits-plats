@@ -1,17 +1,7 @@
 import { 
-    createImage, 
-    createThis, 
-    createThisInput, 
-    CreateRecipeCard, 
-    translatedUnit, 
-    translatedBg, 
-    translatedArgumentsContainer, 
-    translatedArgument,
-    createAdvancedSearchButton,
-    createOption,
-    createArgument,
-    createAndDisplayArgument,
-    translateInput
+    createThis, createThisInput, CreateRecipeCard, translatedBg, 
+    translatedArgumentsContainer, translatedArgument, createAdvancedSearchButton,
+    createOption, createAndDisplayArgument, translateInput
 } from "./common.js";
 const recipesSection = document.getElementById('recipes');
 const searchIngredients = document.getElementById('searchIngredients');
@@ -56,67 +46,11 @@ searchBar.addEventListener('keyup', (e) => {
     return checkAndDisplay();
 })
 
-searchIngredients.addEventListener('keyup', (e) => {
-    e.preventDefault();
-    console.log(e.target.id)
-    if(e.target.value.length > 2){
-        let search = e.target.value.toLowerCase();
-        let filtredRecipes = lastingRecipes.length !== 0 ? lastingRecipes : recipes;
-        let optionsSet = new Set();
-        for(let i = 0; i < filtredRecipes.length; i++){
-            const recipeIngredients = filtredRecipes[i].ingredients;
-            for(let j=0; j < recipeIngredients.length; j++){
-                const ingredientName = recipeIngredients[j].ingredient.toLowerCase();
-                if(ingredientName.indexOf(search) !== -1){ optionsSet.add(ingredientName) }
-            }
-        }
-        let translatedOptionsSetToArray = Array.from(optionsSet);
-        if(translatedOptionsSetToArray.length === 0){ return noOptionFound('ingredients') }
-        return displayOptions(translatedOptionsSetToArray, 'ingredients');
-    } else {
-        const options = findAllOptions("ingredients");
-        return displayOptions(options, 'ingredients');
-    }
-})
+searchIngredients.addEventListener('keyup', (e) => { e.preventDefault(); searchOptions(e) })
+searchDevices.addEventListener('keyup', (e) => { e.preventDefault(); searchOptions(e) })
+searchTools.addEventListener('keyup', (e) => { e.preventDefault(); searchOptions(e) })
 
-function searchOptions(e){
-    let type = translateInput;
-    if(e.target.value.length > 2){
-        console.log(e.target.id)
-        let search = e.target.value.toLowerCase();
-        let filtredRecipes = lastingRecipes.length !== 0 ? lastingRecipes : recipes;
-        let optionsSet = new Set();
-        for(let i = 0; i < filtredRecipes.length; i++){
-            const recipeIngredients = filtredRecipes[i].ingredients;
-            for(let j=0; j < recipeIngredients.length; j++){
-                const ingredientName = recipeIngredients[j].ingredient.toLowerCase();
-                if(ingredientName.indexOf(search) !== -1){ optionsSet.add(ingredientName) }
-            }
-        }
-        let translatedOptionsSetToArray = Array.from(optionsSet);
-        if(translatedOptionsSetToArray.length === 0){ return noOptionFound('ingredients') }
-        return displayOptions(translatedOptionsSetToArray, 'ingredients');
-    } else {
-        const options = findAllOptions("ingredients");
-        return displayOptions(options, 'ingredients');
-    }
-}
-
-
-
-
-
-
-
-
-document.addEventListener('DOMContentLoaded', () => {
-    containerObserver.observe(argumentsContainer, config);
-})
-
-
-// TODO : débugger les arguments qui s'additionne au lieu de soustraire
-// TODO : faire le schema algorithmique
-
+document.addEventListener('DOMContentLoaded', () => { containerObserver.observe(argumentsContainer, config) })
 
 
 displayRecipesCards(recipes);
@@ -240,45 +174,96 @@ function closeAllAdvancedSearch(){
     emptyAllArgumentsContainer();
 }
 
+/**
+ * It will filter the recipes received by the main search input with the arguments received by the advanced search inputs
+ * @param {*} argumentsList - Array of arguments received by the advanced search inputs
+ * @param {*} recipes - Array of recipes received by the main search input
+ * @returns {object} sortedRecipes - array of recipes sorted by the arguments received by the advanced search inputs
+ */
 function searchFromArgumentsAndFoundRecipes(argumentsList, recipes){
-    const recipesSet = new Set();
-    // pour chaque recette on va vérifier si le premier argument est présent dans la recette
-    // puis cela nous donnera un tableau de recettes qui contiennent le premier argument
-    // puis on va vérifier si le deuxième argument est présent dans le tableau de recettes
-    // et ainsi de suite
-    for(let i = 0; i < recipes.length; i++){
-        // boucler sur la bonne propriété de recipes plutôt que argumentsList
-        // puis boucler dans les arguments de argumentsList ??
+    let antiScopedSet = new Set();
+    let sortedRecipes = recipes;
 
-
-        for(let l=0; l< argumentsList.length; l++){
-
-            if( argumentsList[l].type === "ingredients"){
-                for(let j = 0; j < recipes[i].ingredients.length; j++){
-                    let recipeArgumentName = recipes[i].ingredients[j].ingredient.toLowerCase();
-                    let argumentFromListName = argumentsList[l].name.toLowerCase();
-                    if(recipeArgumentName === argumentFromListName){ recipesSet.add(recipes[i]) }
+    for(let i = 0; i < argumentsList.length; i++){
+        let argumentFromListName = argumentsList[i].name.toLowerCase();
+  
+            for(let j = 0; j < sortedRecipes.length; j++){
+            let recipesSet = new Set();
+            
+                if( argumentsList[i].type === "ingredients"){
+                    for(let k = 0; k < sortedRecipes[j].ingredients.length; k++){
+                        let recipeArgumentName = sortedRecipes[j].ingredients[k].ingredient.toLowerCase();
+                        if(recipeArgumentName === argumentFromListName){ recipesSet.add(sortedRecipes[j]) }
+                    }
                 }
-            }
-            else if( argumentsList[l].type === "appliance"){
-                    let recipeArgumentName = recipes[i].appliance.toLowerCase();
-                    let argumentFromListName = argumentsList[l].name.toLowerCase();
-                    if(recipeArgumentName === argumentFromListName){ recipesSet.add(recipes[i]) }
-            }
-            else if( argumentsList[l].type === "ustensils"){
-                for(let j = 0; j < recipes[i].ustensils.length; j++){
-                    let recipeArgumentName = recipes[i].ustensils[j].toLowerCase();
-                    let argumentFromListName = argumentsList[l].name.toLowerCase();
-                    if(recipeArgumentName === argumentFromListName){ recipesSet.add(recipes[i]) }
+                else if( argumentsList[i].type === "appliance"){
+                        let recipeArgumentName = sortedRecipes[j].appliance.toLowerCase();
+                        if(recipeArgumentName === argumentFromListName){ recipesSet.add(sortedRecipes[j]) }
                 }
-            }
-            else{ console.log("this is not a valid arguments type.") }
-
-        } 
+                else if( argumentsList[i].type === "ustensils"){
+                    for(let k = 0; k < sortedRecipes[j].ustensils.length; k++){
+                        let recipeArgumentName = sortedRecipes[j].ustensils[k].toLowerCase();
+                        if(recipeArgumentName === argumentFromListName){ recipesSet.add(sortedRecipes[j]) }
+                    }
+                }
+                else{ console.log("this is not a valid arguments type.") }
+                recipesSet.forEach(recipe => antiScopedSet.add(recipe) )
+            } 
+        
+        sortedRecipes = Array.from(antiScopedSet);
+        antiScopedSet = new Set();
     }
-    let finalRecipes = Array.from(recipesSet)
-    console.log( finalRecipes)
-    return finalRecipes;
+    
+    lastingRecipes = sortedRecipes;
+    console.log( lastingRecipes)
+    return lastingRecipes;
+}
+
+/**
+ * It will search the options in the recipes depending the type of the input
+ * @param {*} e - the event
+ * @returns the appropriate display function with the options
+ */
+function searchOptions(e){
+    let type = translateInput(e.target.id);
+    if(e.target.value.length > 2){
+        let search = e.target.value.toLowerCase();
+        let filtredRecipes = lastingRecipes.length !== 0 ? lastingRecipes : recipes;
+        let optionsSet = new Set();
+        for(let i = 0; i < filtredRecipes.length; i++){
+
+            // ici la partie sur les ingrédients
+            if(type === "ingredients"){
+                const recipeIngredients = filtredRecipes[i].ingredients;
+                for(let j=0; j < recipeIngredients.length; j++){
+                    const ingredientName = recipeIngredients[j].ingredient.toLowerCase();
+                    if(ingredientName.indexOf(search) !== -1){ optionsSet.add(ingredientName) }
+                }
+            }
+            
+            // ici la partie sur les appareils
+            if(type === "appliance"){
+                const applianceName = filtredRecipes[i].appliance.toLowerCase();
+                if(applianceName.indexOf(search) !== -1){ optionsSet.add(applianceName) }
+            }
+            
+            //ici la partie sur les ustencils
+            if(type === "ustensils"){
+                const ustensilsRecipe = filtredRecipes[i].ustensils;
+                for(let j=0; j < ustensilsRecipe.length; j++){
+                    const ustensilsName = ustensilsRecipe[j].toLowerCase();
+                    if(ustensilsName.indexOf(search) !== -1){ optionsSet.add(ustensilsName) }
+                }
+            }
+
+        }
+        let translatedOptionsSetToArray = Array.from(optionsSet);
+        if(translatedOptionsSetToArray.length === 0){ return noOptionFound(type) }
+        return displayOptions(translatedOptionsSetToArray, type);
+    } else {
+        const options = findAllOptions(type);
+        return displayOptions(options, type);
+    }
 }
 
 
@@ -335,15 +320,19 @@ function emptyArgumentsContainer(type){
 
 
 // === DISPLAYS ===
+
+// display all options in the DOM
 function checkAndDisplay(){
     if(argumentsInContainer.length > 0){
-        const recipesFromArguments = searchFromArgumentsAndFoundRecipes(argumentsInContainer, lastingRecipes);
-        return displayRecipesCards(recipesFromArguments);
+        searchFromArgumentsAndFoundRecipes(argumentsInContainer, lastingRecipes);
+        if(lastingRecipes.length === 0){ return displayNoRecipeFound() }
+        return displayRecipesCards(lastingRecipes);
     }    
     if(lastingRecipes.length === 0){ return displayNoRecipeFound() }
     displayRecipesCards(lastingRecipes);
 }
 
+// display all recipes in the DOM
 function displayRecipesCards(givenRecipes) {
     // const recipes = await fetchServerData(server);  == in case of backend server
     const recipesCards = document.getElementById('recipes');
@@ -355,11 +344,14 @@ function displayRecipesCards(givenRecipes) {
     });
 }
 
+// display the HTML container a message to explain no recipe has been found
 function displayNoRecipeFound(){
     recipesSection.innerHTML = "";
     const para = createThis('p', 'recipes__not-found', null, `Aucune recette ne correspond à votre critère… vous pouvez chercher « tarte aux pommes », « poisson », etc.`);
     recipesSection.appendChild(para);
 }
+
+// display all options in the DOM
 function displayOptions(options, type){
     const optionsContainer = translatedArgumentsContainer(type);
     const bgColor = translatedBg(type);
@@ -373,7 +365,14 @@ function displayOptions(options, type){
     }
 }
 
+
 //=== OPTIONS ===
+
+/**
+ * It creates an option element with the given argument and the given background color
+ * @param {*} type - the type of the argument
+ * @returns An array of all the options
+ */
 function findAllOptions(type){
     let optionArray = [];
     let newSet = new Set();
@@ -394,6 +393,11 @@ function findAllOptions(type){
     return optionArray;
 }
 
+/**
+ * It will create the HTML element for the case no option have been found
+ * @param {*} type - the type of the argument
+ * @returns The HTML element
+ */
 function noOptionFound(type){
     const argumentContainer = translatedArgumentsContainer(type);
     const bgColor = translatedBg(type);
@@ -402,23 +406,8 @@ function noOptionFound(type){
     return argumentContainer.appendChild(para);
 }
 
-
-/** d'abord je verifie la barre de recherche, puis ensuite je récupère les arguments
-*   ensuite en utilisant le tableau de la recherche générale, je le couple avec les arguments récupéré, afin d'obtenir un tableau final
-*   ensuite je ferais un display des recettes restante */
+// It will launch the search function and the display function
 function onContainerChange(){
-    //  etape 1, rechercher dans le tableau de recherche principale et retourner un tableau suivant la recherche principale
-    const value = searchBar.value;
-    lastingRecipes = searchFromMainSearchInput(value);
-    //  etape 2, récupérer tous les arguments du container
-    getAllArguments(lastingRecipes);
-    //  etape 3, obtenir un tableau avec les recettes restante suivant le tableau restant de la barre principale + les arguments trouvés.
-    const recipesFound = searchFromArgumentsAndFoundRecipes(argumentsInContainer, lastingRecipes);
-    if(argumentsInContainer.length === 0 && value.length < 2 ){ 
-        lastingRecipes = recipes;
-        return displayRecipesCards(recipes) 
-    }
-
-    if(value.length > 2 && argumentsInContainer.length !== 0) { return displayNoRecipeFound()}
-    return displayRecipesCards(recipesFound);
+    search();
+    checkAndDisplay();
 }

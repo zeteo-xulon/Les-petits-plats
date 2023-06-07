@@ -319,8 +319,8 @@ export function translatedArgument(bgColor){
         default : return null;
     }
 }
-export function translateInput(e){
-    if(e.target.id === "searchIngredientsInput"){ return "ingredients"}
-    if(e.target.id === "searchDevicesInput"){ return "appliance"}
-    if(e.target.id === "searchToolsInput"){ return "ustensils"}
+export function translateInput(input){
+    if(input === "searchIngredientsInput"){ return "ingredients"}
+    if(input === "searchDevicesInput"){ return "appliance"}
+    if(input === "searchToolsInput"){ return "ustensils"}
 }
