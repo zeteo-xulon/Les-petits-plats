@@ -110,9 +110,13 @@ function searchFromMainSearchInput(value){
             }
         }
         let filtredRecipes = Array.from(recipesSet)
-        return lastingRecipes = filtredRecipes;
+        lastingRecipes = filtredRecipes;
+        return lastingRecipes
     } 
-    else { return lastingRecipes = recipes; }
+    else { 
+        lastingRecipes = recipes;
+        return lastingRecipes;
+    }
 }
 
 /**
@@ -207,7 +211,12 @@ function searchFromArgumentsAndFoundRecipes(argumentsList, recipes){
                     }
                 }
                 else{ console.log("this is not a valid arguments type.") }
-                recipesSet.forEach(recipe => antiScopedSet.add(recipe) )
+
+                for(let l = 0; l < recipesSet.length; l++){ 
+                    const recipe = recipesSet[l];
+                    antiScopedSet.add(recipe) 
+                }
+                // recipesSet.forEach(recipe => antiScopedSet.add(recipe) )
             } 
         
         sortedRecipes = Array.from(antiScopedSet);
@@ -337,11 +346,19 @@ function displayRecipesCards(givenRecipes) {
     // const recipes = await fetchServerData(server);  == in case of backend server
     const recipesCards = document.getElementById('recipes');
     recipesCards.innerHTML = "";
-    givenRecipes.forEach(recipe => {
+    
+    for(let i = 0; i < givenRecipes.length; i++){
+        const recipe = givenRecipes[i];
         const cardModel = new CreateRecipeCard(recipe);
         const card = cardModel.render();
         recipesCards.appendChild(card);
-    });
+    }
+
+    // givenRecipes.forEach(recipe => {
+    //     const cardModel = new CreateRecipeCard(recipe);
+    //     const card = cardModel.render();
+    //     recipesCards.appendChild(card);
+    // });
 }
 
 // display the HTML container a message to explain no recipe has been found
