@@ -7,6 +7,7 @@
     margin: 0;
     padding: 0;
 }
+
 .body{
     padding: 0 10%;
 }
@@ -79,9 +80,7 @@
     max-width: 50vw;
     height: 60px;
 }
-.search__advanced__list:hover{
-    /* border: 2px solid gray; */
-}
+
 .advanced__search__button {
     height: 100%;
     display: flex;
@@ -95,18 +94,17 @@ p.search__advanced__text {
     margin: 0px;
     padding: .5rem;
 }
-.arrow {
-    height: 10px;
-}
-.arrow-down{
-    transform: rotate(0deg);
-}
-.arrow-up{
-    transform: rotate(180deg);
-}
+.arrow { height: 10px; }
+.arrow-down{ transform: rotate(0deg); }
+.arrow-up{ transform: rotate(180deg); }
 .btn-transparent{
     border: 0px solid white;
     background: transparent;
+}
+.btn:hover {
+    color: white;
+    background-color: darkgray;
+    border-color: transparent;
 }
 .search__advanced__input{
     padding: .5rem;
@@ -201,10 +199,7 @@ p.search__advanced__text {
     font-size: 1rem;
     font-weight: 700;
 }
-.cooking-time{
-    white-space: nowrap;
-}
-
+.cooking-time{ white-space: nowrap; }
 .clock-icon{ width: 1rem;}
 
 
@@ -212,8 +207,8 @@ p.search__advanced__text {
 .recipe__down-text{
     display: flex;
     flex-flow: row nowrap;
-    gap: 1rem;
-    font-size: 0.65rem;
+    gap: 0.5rem;
+    font-size: 0.70rem;
 }
 .recipe__ingredient{
     width: 50%;
@@ -233,7 +228,12 @@ p.search__advanced__text {
     width: 100%;
     white-space: nowrap;
 }
-.recipe__ingredient__name{ font-weight: 700; }
+.recipe__ingredient__name{ 
+    font-weight: 700;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 70%; 
+}
 .recipe__quantity{
     display: flex;
     flex-flow: row nowrap;
@@ -243,18 +243,31 @@ p.search__advanced__text {
 .recipe__description{
     display: -webkit-box;
     display: -moz-box;
-    display: box;
     -webkit-box-orient: vertical;
     -moz-box-orient: vertical;
-    box-orient: vertical;
     overflow: hidden;
     text-overflow: ellipsis;
     /* Nombre maximum de lignes à afficher */
     -webkit-line-clamp: 6;
     -moz-line-clamp: 6;
-    line-clamp: 6;
     /* Hauteur maximale du conteneur */
-    width: 100%;
+    width: 50%;
     margin: 0;
     padding: 0;
+}
+
+
+@media (max-width: 1170px) {
+    .recipe__card {
+        flex-grow: 1;
+        max-width: calc(50% - 1rem); 
+        width: calc(50% - 1rem);
+    }
+}
+@media (max-width: 770px) {
+    .recipe__card {
+        flex-grow: 1;
+        max-width: 100%;
+        width: 100%;
+    }
 }

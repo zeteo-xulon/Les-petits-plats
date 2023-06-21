@@ -254,8 +254,8 @@ function searchOptions(e){
 
 //=== ARGUMENTS ===
 
-// d'abord créer un tableau vide, puis aller checker le conteneur des arguments.
-// S'il y a des arguments, alors on les ajoute au tableau en spécifiant le type d'argument et l'argument lui-même
+// First, create an empty array, then check the argument container.
+// If there are arguments, then add them to the array, specifying the argument type and the argument itself.
 function getAllArguments(){
     let allArguments = new Set();
     const argumentsSelected = document.querySelectorAll('.argument');
@@ -271,6 +271,12 @@ function getAllArguments(){
     }
 }
 
+/**
+ * Adds an argument to the list of selected arguments.
+ * @param {Event} e - The event object that triggered the function call.
+ * @param {boolean} [isAlreadyInList=false] - A flag that indicates whether the argument is already in the list of selected arguments.
+ * @returns {void}
+ */
 function addArgument(e, isAlreadyInList=false){
     const argument = e.target.innerText;
     getAllArguments();

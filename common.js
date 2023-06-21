@@ -319,6 +319,12 @@ export function translatedArgument(bgColor){
         default : return null;
     }
 }
+
+/**
+ * Translates an input ID to a search type.
+ * @param {string} input - The ID of the input element.
+ * @returns {string} The search type corresponding to the input ID.
+ */
 export function translateInput(input){
     if(input === "searchIngredientsInput"){ return "ingredients"}
     if(input === "searchDevicesInput"){ return "appliance"}
