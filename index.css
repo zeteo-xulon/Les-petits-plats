@@ -80,9 +80,7 @@
     max-width: 50vw;
     height: 60px;
 }
-.search__advanced__list:hover{
-    /* border: 2px solid gray; */
-}
+
 .advanced__search__button {
     height: 100%;
     display: flex;
@@ -96,15 +94,9 @@ p.search__advanced__text {
     margin: 0px;
     padding: .5rem;
 }
-.arrow {
-    height: 10px;
-}
-.arrow-down{
-    transform: rotate(0deg);
-}
-.arrow-up{
-    transform: rotate(180deg);
-}
+.arrow { height: 10px; }
+.arrow-down{ transform: rotate(0deg); }
+.arrow-up{ transform: rotate(180deg); }
 .btn-transparent{
     border: 0px solid white;
     background: transparent;
@@ -112,7 +104,7 @@ p.search__advanced__text {
 .btn:hover {
     color: white;
     background-color: darkgray;
-    border-color: none;
+    border-color: transparent;
 }
 .search__advanced__input{
     padding: .5rem;
@@ -207,10 +199,7 @@ p.search__advanced__text {
     font-size: 1rem;
     font-weight: 700;
 }
-.cooking-time{
-    white-space: nowrap;
-}
-
+.cooking-time{ white-space: nowrap; }
 .clock-icon{ width: 1rem;}
 
 
