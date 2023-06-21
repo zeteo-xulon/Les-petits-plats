@@ -17,7 +17,6 @@ const containerObserver = new MutationObserver((mutation) => {
 
 let argumentsInContainer = [];
 let lastingRecipes = [];
-console.log(recipes);
 
 
 window.addEventListener('click', (e) => {
@@ -42,7 +41,6 @@ window.addEventListener('click', (e) => {
 searchBar.addEventListener('keyup', (e) => {
     e.preventDefault();
     search();
-    console.log(lastingRecipes)
     return checkAndDisplay();
 })
 
@@ -58,22 +56,19 @@ displayRecipesCards(recipes);
 
 // === SEARCH'S ===
 
-/** function qui vérifie tous les conteneurs de recherche
- * Premierement ça va lancer une recherche avec le contenu de la barre de recherche principale
- * puis ça va vérifier dans le conteneur a argument son contenu, 
- * en lui passant le résultat de la recherche principale
- * cette fonction se lance à chaque fois qu'il y a un changement dans l'input de la barre de recherche
- * ou a chaque fois qu'un argument est ajouté
- * 
- * Case :
- * 1 - la barre de recherche a moins de 3 caractères, on envoi donc le tableau des recettes entier
- * 2 - la barre de recherche a 3 caractères ou plus, et on a des recettes trouvé, on envoi ce tableau
- * 3 - la barre de recherche a 3 caractères ou plus, et on a pas de recettes trouvé, on affiche le message "aucune recettes correspond a la recherche."
- * 
- * 4 - il n'y a pas d'arguments dans le conteneur, on affiche les résultat reçu par la barre de recherche principale
- * 5 - il y a des arguments dans le conteneur, on tri les recettes avec le tableau reçu, il reste des recettes, et on les affiches
- * 6 - il y a des arguments dans le conteneur, on tri les recettes avec le tableau reçu, il ne reste PAS de recettes. on affiche le message "aucune recettes correspond a la recherche."
- */
+/** Function that checks all search containers
+* Firstly, it will perform a search with the content of the main search bar
+* then it will check the argument container by passing it the result of the main search
+* This function is triggered whenever there is a change in the input of the search bar
+* or whenever an argument is added.
+* Cases:
+* 1 - The search bar has fewer than 3 characters, so the entire array of recipes is sent
+* 2 - The search bar has 3 or more characters, and recipes are found, this array is sent
+* 3 - The search bar has 3 or more characters, but no recipes are found, the message "no recipes match the search" is displayed.
+* 4 - There are no arguments in the container, the results received from the main search are displayed
+* 5 - Arguments are present in the container, the recipes are sorted using the received array. If there are remaining recipes, they are displayed
+* 6 - Arguments are present in the container, the recipes are sorted using the received array. If there are no recipes remaining, the message "no recipes match the search" is displayed.
+*/
 function search(){
     let searchBarInputContent = document.getElementById('searchBar').value;
     // case 1,2,3
@@ -84,14 +79,14 @@ function search(){
 }
 
 /**
- * 1. on filtre les recettes par nom de recette
-* 2. on filtre les recettes par description de recette
-* 3. on filtre les recettes par ingredients de recette
-* 4. on affiche les recettes filtrées
-* La méthode indexOf est utilisé car plus bas niveau et un peu plus rapide que includes
- * @param {String} value - ce qui est tapé dans l'input de la barre de recherche principale 
- * @returns le tableau selon la recherche ou celui par défaut.
- */
+* Filter recipes by recipe name
+* Filter recipes by recipe description
+* Filter recipes by recipe ingredients
+* Display the filtered recipes
+* The indexOf method is used because it is lower level and slightly faster than includes
+* @param {String} value - What is typed in the main search bar input
+* @returns The array based on the search or the default array.
+*/
 function searchFromMainSearchInput(value){
     if(value.length > 2){
         let search = value.toLowerCase();
@@ -212,9 +207,8 @@ function searchFromArgumentsAndFoundRecipes(argumentsList, recipes){
                 }
                 else{ console.log("this is not a valid arguments type.") }
 
-                for(let l = 0; l < recipesSet.length; l++){ 
-                    const recipe = recipesSet[l];
-                    antiScopedSet.add(recipe) 
+                for(let recipe of recipesSet){ 
+                    antiScopedSet.add(recipe) ;
                 }
                 // recipesSet.forEach(recipe => antiScopedSet.add(recipe) )
             } 
@@ -224,7 +218,6 @@ function searchFromArgumentsAndFoundRecipes(argumentsList, recipes){
     }
     
     lastingRecipes = sortedRecipes;
-    console.log( lastingRecipes)
     return lastingRecipes;
 }
 
@@ -278,8 +271,8 @@ function searchOptions(e){
 
 //=== ARGUMENTS ===
 
-// d'abord créer un tableau vide, puis aller checker le conteneur des arguments.
-// S'il y a des arguments, alors on les ajoute au tableau en spécifiant le type d'argument et l'argument lui-même
+// First, create an empty array, then check the argument container.
+// If there are arguments, then add them to the array, specifying the argument type and the argument itself.
 function getAllArguments(){
     let allArguments = new Set();
     const argumentsSelected = document.querySelectorAll('.argument');
@@ -295,6 +288,12 @@ function getAllArguments(){
     }
 }
 
+/**
+ * Adds an argument to the list of selected arguments.
+ * @param {Event} e - The event object that triggered the function call.
+ * @param {boolean} [isAlreadyInList=false] - A flag that indicates whether the argument is already in the list of selected arguments.
+ * @returns {void}
+ */
 function addArgument(e, isAlreadyInList=false){
     const argument = e.target.innerText;
     getAllArguments();
@@ -353,12 +352,6 @@ function displayRecipesCards(givenRecipes) {
         const card = cardModel.render();
         recipesCards.appendChild(card);
     }
-
-    // givenRecipes.forEach(recipe => {
-    //     const cardModel = new CreateRecipeCard(recipe);
-    //     const card = cardModel.render();
-    //     recipesCards.appendChild(card);
-    // });
 }
 
 // display the HTML container a message to explain no recipe has been found
