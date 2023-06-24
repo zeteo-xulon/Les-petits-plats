@@ -17,7 +17,6 @@ const containerObserver = new MutationObserver((mutation) => {
 
 let argumentsInContainer = [];
 let lastingRecipes = [];
-console.log(recipes);
 
 
 window.addEventListener('click', (e) => {
@@ -42,7 +41,6 @@ window.addEventListener('click', (e) => {
 searchBar.addEventListener('keyup', (e) => {
     e.preventDefault();
     search();
-    console.log(lastingRecipes)
     return checkAndDisplay();
 })
 
@@ -200,7 +198,6 @@ function searchFromArgumentsAndFoundRecipes(argumentsList, recipes) {
     });
     
     lastingRecipes = workingRecipes;
-    console.log(lastingRecipes);
     return lastingRecipes;
 }
 
